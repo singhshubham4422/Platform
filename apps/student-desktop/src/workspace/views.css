@@ -1,0 +1,334 @@
+.sv-page {
+  padding: 24px 28px 40px;
+  overflow: auto;
+  height: 100%;
+  max-width: 1280px;
+  width: 100%;
+  margin: 0 auto;
+}
+.sv-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+.sv-sub,
+.sv-muted {
+  color: var(--muted);
+  font-size: 13px;
+}
+.sv-strong {
+  font-weight: 600;
+}
+.sv-faint {
+  color: var(--border-strong);
+}
+.sv-amber {
+  color: var(--warning);
+}
+.sv-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.sv-filters select,
+.sv-form select,
+.sv-form input[type='number'] {
+  height: 34px;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text);
+  padding: 0 8px;
+  font: inherit;
+  font-size: 13px;
+}
+.sv-search {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 220px;
+  height: 34px;
+  padding: 0 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--muted);
+}
+.sv-search input {
+  border: 0;
+  outline: 0;
+  flex: 1;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+}
+.sv-table {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--surface);
+}
+.sv-row {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 2.4fr) minmax(0, 1.4fr) 110px minmax(0, 1.2fr);
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 11px 16px;
+  border: 0;
+  border-top: 1px solid var(--border);
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: 13.5px;
+  text-align: left;
+  cursor: pointer;
+}
+.sv-row:hover:not(.sv-row-head) {
+  background: var(--surface-2);
+}
+.sv-row:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+.sv-row-head {
+  border-top: 0;
+  cursor: default;
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  background: var(--surface-2);
+}
+.sv-row-results {
+  grid-template-columns: minmax(0, 2.2fr) 70px 150px 70px 110px minmax(0, 1.6fr);
+  cursor: default;
+}
+.sv-chip {
+  display: inline-block;
+  margin-left: 8px;
+  font-size: 10.5px;
+  font-style: normal;
+  font-weight: 600;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--info-soft);
+  color: var(--info);
+}
+.sv-pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 14px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.sv-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 48px 16px;
+  color: var(--muted);
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+}
+.sv-error {
+  color: var(--danger);
+  flex-direction: column;
+}
+.sv-error-text {
+  color: var(--danger);
+  font-size: 12.5px;
+  margin-top: 8px;
+}
+.sv-ok-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--success);
+  font-size: 12.5px;
+}
+.sv-group {
+  margin-top: 22px;
+}
+.sv-group h2 {
+  font-size: 15px;
+  margin-bottom: 10px;
+}
+.sv-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 14px;
+}
+.sv-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.sv-card header {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+.sv-card h3 {
+  font-size: 15px;
+}
+.sv-card-compact {
+  gap: 4px;
+  padding: 12px 14px;
+}
+.sv-eyebrow {
+  font-size: 11px;
+  color: var(--accent);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.sv-clamp {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.sv-download {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.sv-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.sv-actions .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.sv-files {
+  list-style: none;
+  border-top: 1px solid var(--border);
+  padding-top: 8px;
+}
+.sv-files button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 5px 4px;
+  border: 0;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+.sv-files button:hover {
+  background: var(--surface-2);
+}
+.sv-list {
+  list-style: none;
+  display: grid;
+  gap: 6px;
+}
+.sv-list li > button {
+  display: grid;
+  grid-template-columns: 20px 1fr auto;
+  gap: 10px;
+  align-items: start;
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.sv-unread > button {
+  border-left: 3px solid var(--accent);
+  background: var(--accent-soft);
+}
+.sv-list-plain li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.sv-settings {
+  max-width: 860px;
+  display: grid;
+  gap: 16px;
+}
+.sv-settings h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+}
+.sv-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+}
+.sv-form label {
+  display: grid;
+  gap: 4px;
+  font-size: 12.5px;
+  color: var(--text-2);
+}
+.sv-form .sv-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.sv-kv {
+  list-style: none;
+}
+.sv-kv li {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 0;
+  border-bottom: 1px dashed var(--border);
+  font-size: 13px;
+}
+.sv-skills {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 8px 24px;
+}
+.sv-skill {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+}
+.sv-meter {
+  height: 8px;
+  background: var(--surface-2);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.sv-meter div {
+  height: 100%;
+  background: var(--success);
+}

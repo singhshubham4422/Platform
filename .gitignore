@@ -1,0 +1,34 @@
+node_modules/
+dist/
+.next/
+out/
+coverage/
+.turbo/
+.vercel/
+test-results/
+playwright-report/
+blob-report/
+*.tsbuildinfo
+target/
+*.log
+*.pem
+.env
+.env.*
+!.env.example
+infra/judge/judge0.env
+infra/judge/judge0.conf
+infra/judge/production/judge0.env
+infra/judge/production/judge0.conf
+
+# Generated runtimes and local state
+apps/student-desktop/public/pyodide/
+apps/student-desktop/public/monaco/
+.local/
+infra/local-development/storage-data/
+
+# Desktop installers
+*.msi
+*.exe
+*.AppImage
+*.deb
+*.rpm

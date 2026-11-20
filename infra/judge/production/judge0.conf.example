@@ -1,0 +1,66 @@
+# Judge0 CE 1.13.1 — production settings. Copy to judge0.conf AND judge0.env (both git-ignored,
+# chmod 600, owned by root). Generate each secret with: openssl rand -hex 32
+# Never reuse values between environments and never commit the real files.
+
+# --- Datastores (private network only) ---
+REDIS_HOST=redis
+REDIS_PORT=6379
+REDIS_PASSWORD=<openssl rand -hex 32>
+POSTGRES_HOST=db
+POSTGRES_PORT=5432
+POSTGRES_DB=judge0
+POSTGRES_USER=judge0
+POSTGRES_PASSWORD=<openssl rand -hex 32>
+
+# --- Authentication ---
+# AUTHN_TOKEN: required on every request. The ONLY Judge0 secret given to the platform API
+# (as JUDGE0_AUTH_TOKEN).
+AUTHN_HEADER=X-Auth-Token
+AUTHN_TOKEN=<openssl rand -hex 32>
+# AUTHZ_TOKEN: unlocks administrative endpoints (workers, config, submission deletion).
+# MUST differ from AUTHN_TOKEN and stay with operators only; the API never receives it.
+AUTHZ_HEADER=X-Auth-User
+AUTHZ_TOKEN=<openssl rand -hex 32, different from AUTHN_TOKEN>
+
+# --- Workers ---
+# One worker per vCPU is a reasonable start; each runs one submission at a time.
+COUNT=4
+INTERVAL=0.1
+MAX_QUEUE_SIZE=200
+MAX_SUBMISSION_BATCH_SIZE=20
+
+# --- Resource ceilings (the API sends per-question limits within these) ---
+CPU_TIME_LIMIT=2
+MAX_CPU_TIME_LIMIT=10
+CPU_EXTRA_TIME=0.5
+MAX_CPU_EXTRA_TIME=2
+WALL_TIME_LIMIT=5
+MAX_WALL_TIME_LIMIT=20
+MEMORY_LIMIT=262144
+MAX_MEMORY_LIMIT=524288
+STACK_LIMIT=65536
+MAX_STACK_LIMIT=131072
+MAX_PROCESSES_AND_OR_THREADS=60
+MAX_MAX_PROCESSES_AND_OR_THREADS=120
+ENABLE_PER_PROCESS_AND_THREAD_TIME_LIMIT=false
+ENABLE_PER_PROCESS_AND_THREAD_MEMORY_LIMIT=false
+MAX_FILE_SIZE=1024
+MAX_MAX_FILE_SIZE=4096
+NUMBER_OF_RUNS=1
+MAX_NUMBER_OF_RUNS=1
+
+# --- Hardening ---
+ENABLE_NETWORK=false
+ALLOW_ENABLE_NETWORK=false
+ENABLE_CALLBACKS=false
+ENABLE_SUBMISSION_DELETE=false
+ENABLE_BATCHED_SUBMISSIONS=true
+ENABLE_WAIT_RESULT=false
+ENABLE_COMPILER_OPTIONS=true
+ALLOWED_LANGUAGES_FOR_COMPILE_OPTIONS=
+ENABLE_COMMAND_LINE_ARGUMENTS=false
+ENABLE_ADDITIONAL_FILES=false
+# Results older than this are purged by Judge0; the platform keeps its own copy.
+SUBMISSION_CACHE_DURATION=1
+RAILS_ENV=production
+RAILS_LOG_LEVEL=warn

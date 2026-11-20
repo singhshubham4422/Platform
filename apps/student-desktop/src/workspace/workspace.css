@@ -1,0 +1,427 @@
+/* Programming Workspace — uses the app's design tokens (index.css), light and dark. */
+.ws-root {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  background: var(--bg);
+  color: var(--text);
+}
+.ws-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  min-height: 52px;
+}
+.ws-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
+}
+.ws-title strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 15px;
+}
+.ws-toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.ws-icon-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-2);
+  cursor: pointer;
+}
+.ws-icon-btn:hover {
+  background: var(--surface-2);
+  border-color: var(--border);
+  color: var(--text);
+}
+.ws-icon-btn:focus-visible,
+.ws-tabs button:focus-visible,
+.ws-gutter:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+.ws-select select {
+  height: 32px;
+  border-radius: 6px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
+  padding: 0 8px;
+  font: inherit;
+  font-size: 13px;
+}
+.ws-font {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.ws-font span {
+  min-width: 34px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.ws-save {
+  font-size: 12px;
+  min-width: 56px;
+  color: var(--muted);
+}
+.ws-save-unsaved {
+  color: var(--warning);
+}
+.ws-run,
+.ws-submit {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+}
+.ws-tag {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--text-2);
+  border: 1px solid var(--border);
+}
+.ws-diff {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: capitalize;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+.ws-diff-easy {
+  background: var(--success-soft);
+  color: var(--success);
+}
+.ws-diff-medium {
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+.ws-diff-hard {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+.ws-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  font-size: 13px;
+  border-bottom: 1px solid var(--border);
+}
+.ws-banner-warn {
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+.ws-banner-info {
+  background: var(--info-soft);
+  color: var(--info);
+}
+.ws-banner-error {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+.ws-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+.ws-left {
+  display: flex;
+  flex-direction: column;
+  min-width: 260px;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+}
+.ws-right {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.ws-editor {
+  min-height: 120px;
+  background: var(--surface);
+}
+.ws-gutter {
+  flex-shrink: 0;
+  background: var(--border);
+  transition: background 0.15s;
+}
+.ws-gutter:hover,
+.ws-resizing .ws-gutter {
+  background: var(--accent);
+}
+.ws-gutter-x {
+  width: 4px;
+  cursor: col-resize;
+}
+.ws-gutter-y {
+  height: 4px;
+  cursor: row-resize;
+}
+.ws-resizing {
+  user-select: none;
+}
+.ws-tabs {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0 8px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  min-height: 38px;
+}
+.ws-tabs button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 37px;
+  padding: 0 12px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 550;
+  cursor: pointer;
+}
+.ws-tabs button[aria-selected='true'] {
+  color: var(--text);
+  border-bottom-color: var(--accent);
+}
+.ws-problem,
+.ws-history {
+  overflow: auto;
+  padding: 16px 18px 24px;
+  flex: 1;
+}
+.ws-problem h4 {
+  margin: 18px 0 6px;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-2);
+}
+.ws-meta {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+.ws-text {
+  white-space: pre-wrap;
+  line-height: 1.6;
+  font-size: 14px;
+}
+.ws-pre {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 260px;
+  overflow: auto;
+  color: var(--text);
+}
+.ws-pre-err {
+  color: var(--danger);
+}
+.ws-compile {
+  max-height: none;
+  min-height: 100%;
+}
+.ws-example {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 10px;
+  display: grid;
+  gap: 8px;
+}
+.ws-example > span {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-2);
+}
+.ws-example label,
+.ws-io label,
+.ws-custom label {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.ws-note {
+  font-size: 12.5px;
+  color: var(--muted);
+  margin-top: 10px;
+}
+.ws-history-row {
+  display: grid;
+  grid-template-columns: 54px 80px auto 44px 1fr;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 4px;
+  border-bottom: 1px solid var(--border);
+  font-size: 12.5px;
+}
+.ws-history-kind {
+  font-weight: 600;
+}
+.ws-muted {
+  color: var(--muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.ws-console {
+  display: flex;
+  flex-direction: column;
+  min-height: 90px;
+  background: var(--surface);
+}
+.ws-console-status {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+}
+.ws-status-running {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--info);
+}
+.ws-console-body {
+  flex: 1;
+  overflow: auto;
+  padding: 10px 14px;
+}
+.ws-results {
+  display: grid;
+  gap: 8px;
+}
+.ws-result {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 10px;
+}
+.ws-result summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 13px;
+}
+.ws-io {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+  margin-top: 8px;
+}
+.ws-custom textarea {
+  width: 100%;
+  min-height: 110px;
+  font-family: var(--mono);
+  font-size: 13px;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  padding: 8px;
+  background: var(--surface);
+  color: var(--text);
+  resize: vertical;
+}
+.ws-pill {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.ws-pill-ok {
+  background: var(--success-soft);
+  color: var(--success);
+}
+.ws-pill-bad {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+.ws-pill-neutral {
+  background: var(--surface-2);
+  color: var(--text-2);
+}
+.ws-ok {
+  color: var(--success);
+}
+.ws-bad {
+  color: var(--danger);
+}
+.ws-statusbar {
+  display: flex;
+  gap: 18px;
+  padding: 4px 12px;
+  font-size: 11.5px;
+  color: var(--muted);
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+}
+.ws-statusbar span:last-child {
+  margin-left: auto;
+}
+.ws-error-screen {
+  height: 100%;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 10px;
+  color: var(--text-2);
+}
+.ws-spin {
+  animation: ws-spin 0.9s linear infinite;
+}
+@keyframes ws-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+@media (max-width: 1280px) {
+  .ws-font span,
+  .ws-statusbar span:last-child {
+    display: none;
+  }
+}

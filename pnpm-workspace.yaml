@@ -1,0 +1,15 @@
+packages:
+  - apps/*
+  - packages/*
+
+allowBuilds:
+  argon2: true
+  esbuild: true
+  sharp: true
+  '@tailwindcss/oxide': true
+  unrs-resolver: true
+
+overrides:
+  '@esbuild-kit/core-utils>esbuild': '>=0.25.0'
+  minimatch@>=7.0.0 <11.0.1: '>=11.0.1'
+  postcss: '>=8.5.23'

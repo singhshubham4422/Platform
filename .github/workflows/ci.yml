@@ -1,0 +1,122 @@
+name: Unified CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16.2
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: lplatform_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d lplatform_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      CI: true
+      NODE_ENV: test
+      DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/lplatform_test
+      DATABASE_SSL: "false"
+      JWT_SECRET: ci-only-secret-change-before-any-deployment-000001
+      COOKIE_SECRET: ci-only-cookie-secret-change-before-any-deployment-000002
+      CORS_ORIGIN: http://localhost:3000
+      EMAIL_PROVIDER: dev-outbox
+      STORAGE_PROVIDER: local
+      STORAGE_LOCAL_DIR: .local/ci-storage
+      FORCE_RESEED_PASSWORDS: "true"
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+        with:
+          version: 12.18.0
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          node-version: 24
+          cache: pnpm
+      - name: Install Linux desktop check dependencies
+        run: sudo apt-get update && sudo apt-get install -y build-essential curl file libssl-dev libayatana-appindicator3-dev librsvg2-dev libwebkit2gtk-4.1-dev
+      - run: pnpm install --frozen-lockfile
+      - name: Lint
+        run: pnpm lint
+      - name: Typecheck
+        run: pnpm typecheck
+      - name: Unit tests
+        run: pnpm test
+      - name: Migrate and seed PostgreSQL
+        run: pnpm db:migrate && pnpm db:seed:dev
+      - name: PostgreSQL integration and RLS tests
+        run: pnpm --filter @lplatform/api test:integration
+      - name: Production builds
+        run: pnpm build
+      - name: Rust format and native checks
+        run: cargo +stable fmt --manifest-path apps/student-desktop/Cargo.toml --all -- --check && cargo +stable check --manifest-path apps/student-desktop/Cargo.toml
+      - name: Dependency audit
+        run: pnpm audit --audit-level high
+
+  browser-e2e:
+    runs-on: ubuntu-latest
+    needs: checks
+    services:
+      postgres:
+        image: postgres:16.2
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: lplatform_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d lplatform_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      NODE_ENV: test
+      DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/lplatform_test
+      DATABASE_SSL: "false"
+      JWT_SECRET: ci-only-secret-change-before-any-deployment-000001
+      COOKIE_SECRET: ci-only-cookie-secret-change-before-any-deployment-000002
+      CORS_ORIGIN: http://localhost:3000,http://127.0.0.1:3100
+      EMAIL_PROVIDER: dev-outbox
+      STORAGE_PROVIDER: local
+      STORAGE_LOCAL_DIR: .local/e2e-storage
+      FORCE_RESEED_PASSWORDS: "true"
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a # v5.0.0
+      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+        with:
+          version: 12.18.0
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Prepare isolated E2E database
+        run: pnpm db:migrate && pnpm db:seed:dev
+      - name: Start API
+        run: |
+          pnpm dev:api > /tmp/lplatform-api.log 2>&1 &
+          for attempt in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:3001/health >/dev/null; then exit 0; fi
+            sleep 2
+          done
+          cat /tmp/lplatform-api.log
+          exit 1
+      - run: pnpm --filter @lplatform/web exec playwright install --with-deps chromium
+      - name: Existing web browser acceptance suite
+        run: pnpm test:e2e
+        env:
+          CI: true
+          NODE_ENV: test

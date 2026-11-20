@@ -1,0 +1,86 @@
+# Judge0 CE v1.13.1 upstream service topology (licensed GPL-3.0).
+# The API is published only on loopback for local development. Keep this host private in production.
+name: lplatform-judge
+
+x-judge0: &judge0
+  image: lplatform/judge0-ce:1.13.1-redacted
+  build:
+    context: .
+    dockerfile: Dockerfile
+  restart: unless-stopped
+  env_file: judge0.env
+  volumes:
+    - ./judge0.conf:/judge0.conf:ro
+  networks: [judge-private]
+  logging:
+    driver: json-file
+    options:
+      max-size: 20m
+      max-file: "3"
+
+services:
+  server:
+    <<: *judge0
+    networks: [judge-private, judge-gateway]
+    ports:
+      - "127.0.0.1:2358:2358"
+    depends_on:
+      db: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS -H \"X-Auth-Token: $${AUTHN_TOKEN}\" http://127.0.0.1:2358/languages >/dev/null"]
+      interval: 15s
+      timeout: 5s
+      retries: 12
+      start_period: 60s
+    # Upstream Judge0 requires privileged Linux containers for isolate/cgroups.
+    # Run only on a dedicated Linux VM; Docker Desktop is for local development.
+    privileged: true
+
+  worker:
+    <<: *judge0
+    command: ["./scripts/workers"]
+    depends_on:
+      db: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    privileged: true
+
+  db:
+    image: postgres:16.2
+    restart: unless-stopped
+    env_file: judge0.env
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-judge0}
+      POSTGRES_USER: ${POSTGRES_USER:-judge0}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in infra/judge/judge0.env}
+    volumes:
+      - judge-data:/var/lib/postgresql/data
+    networks: [judge-private]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7.2.4
+    restart: unless-stopped
+    env_file: judge0.env
+    command: ["sh", "-c", "exec redis-server --appendonly no --requirepass \"$$REDIS_PASSWORD\""]
+    networks: [judge-private]
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a \"$$REDIS_PASSWORD\" ping 2>/dev/null | grep -q PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+networks:
+  judge-private:
+    internal: true
+  # Only the API gateway needs a route from the Windows host (loopback publish above).
+  # The execution worker, database, and cache remain isolated on judge-private.
+  judge-gateway:
+    driver: bridge
+
+volumes:
+  judge-data:

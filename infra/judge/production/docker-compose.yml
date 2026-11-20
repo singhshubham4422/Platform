@@ -1,0 +1,94 @@
+# L_Platform — Judge0 CE 1.13.1 production deployment (dedicated Ubuntu 22.04 LTS VM).
+#
+# Topology: platform API host ──(private network, TLS proxy, X-Auth-Token)──► judge VM.
+# Nothing here is reachable from the public internet: the API port binds only to the VM's
+# private address (JUDGE0_BIND_ADDR) and the host firewall allows it only from the API host(s).
+# Run scripts/preflight.sh first; Judge0 CE 1.13.1's Isolate needs cgroup v1 (see README).
+name: lplatform-judge-prod
+
+x-judge0: &judge0
+  # Official image pinned by digest, with secrets removed from the startup environment dump.
+  image: lplatform/judge0-ce:1.13.1-redacted
+  build:
+    context: ..
+    dockerfile: Dockerfile
+  restart: unless-stopped
+  env_file: judge0.env
+  volumes:
+    - ./judge0.conf:/judge0.conf:ro
+  networks: [judge-private]
+  logging:
+    driver: json-file
+    options: { max-size: 20m, max-file: "5" }
+
+services:
+  server:
+    <<: *judge0
+    networks: [judge-private, judge-edge]
+    ports:
+      # Private interface only. Never 0.0.0.0. Terminate TLS in front (see README) or keep on a private VPC link.
+      - "${JUDGE0_BIND_ADDR:?Set JUDGE0_BIND_ADDR to the VM private IP}:2358:2358"
+    depends_on:
+      db: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS -H \"X-Auth-Token: $${AUTHN_TOKEN}\" http://127.0.0.1:2358/languages >/dev/null"]
+      interval: 15s
+      timeout: 5s
+      retries: 12
+      start_period: 60s
+    # Upstream requirement: Isolate creates control groups and namespaces for each run.
+    privileged: true
+
+  worker:
+    <<: *judge0
+    command: ["./scripts/workers"]
+    depends_on:
+      db: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    privileged: true
+    # Size worker count (COUNT in judge0.conf) to vCPUs; cap the container as a whole as well.
+    deploy:
+      resources:
+        limits: { cpus: "${JUDGE_WORKER_CPUS:-4}", memory: "${JUDGE_WORKER_MEMORY:-6g}" }
+
+  db:
+    image: postgres:16.2
+    restart: unless-stopped
+    env_file: judge0.env
+    volumes:
+      - judge-data:/var/lib/postgresql/data
+    networks: [judge-private]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7.2.4
+    restart: unless-stopped
+    env_file: judge0.env
+    # Judge0 queues are transient; AOF persistence keeps queued jobs across a Redis restart.
+    command: ["sh", "-c", "exec redis-server --appendonly yes --requirepass \"$$REDIS_PASSWORD\""]
+    volumes:
+      - judge-redis:/data
+    networks: [judge-private]
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a \"$$REDIS_PASSWORD\" ping 2>/dev/null | grep -q PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+networks:
+  # No external route: workers, database and cache cannot reach the internet or the platform network.
+  judge-private:
+    internal: true
+  judge-edge:
+    driver: bridge
+
+volumes:
+  judge-data:
+    name: lplatform_judge_prod_data
+  judge-redis:
+    name: lplatform_judge_prod_redis

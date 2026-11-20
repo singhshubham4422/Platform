@@ -1,0 +1,37 @@
+{
+  "name": "lplatform",
+  "version": "1.0.0-alpha.1",
+  "private": true,
+  "description": "L_Platform: unified engineering-college learning, assessment and programming platform (API, web consoles, student desktop).",
+  "packageManager": "pnpm@12.18.0",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "scripts": {
+    "dev": "pnpm --parallel --filter @lplatform/api --filter @lplatform/web dev",
+    "dev:api": "pnpm --filter @lplatform/api dev",
+    "dev:web": "pnpm --filter @lplatform/web dev",
+    "dev:desktop": "pnpm --filter @lplatform/student-desktop dev",
+    "dev:desktop:tauri": "pnpm --filter @lplatform/student-desktop tauri dev",
+    "dev:judge": "pnpm --filter @lplatform/api judge:worker",
+    "dev:infra": "node scripts/local-postgres.mjs start",
+    "dev:infra:stop": "node scripts/local-postgres.mjs stop",
+    "dev:infra:docker": "pnpm infra:up",
+    "infra:up": "docker compose -f infra/docker/docker-compose.yml up -d --wait",
+    "infra:down": "docker compose -f infra/docker/docker-compose.yml down",
+    "judge:up": "docker compose --env-file infra/judge/judge0.env -f infra/judge/docker-compose.yml up -d --wait",
+    "judge:down": "docker compose --env-file infra/judge/judge0.env -f infra/judge/docker-compose.yml down",
+    "test:judge0": "pnpm --filter @lplatform/api test:judge0",
+    "test": "pnpm -r --workspace-concurrency=1 test",
+    "test:integration": "node scripts/local-postgres.mjs integration",
+    "test:e2e": "pnpm --filter @lplatform/web e2e",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck",
+    "build": "pnpm -r build",
+    "check:rust": "cargo +stable check --manifest-path apps/student-desktop/Cargo.toml",
+    "db:migrate": "pnpm --filter @lplatform/api db:migrate",
+    "clean": "node scripts/clean.mjs",
+    "db:bootstrap": "pnpm --filter @lplatform/api db:bootstrap",
+    "db:seed:dev": "pnpm --filter @lplatform/api db:seed"
+  }
+}

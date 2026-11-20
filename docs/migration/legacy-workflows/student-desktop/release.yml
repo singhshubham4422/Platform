@@ -1,0 +1,129 @@
+name: Desktop Release
+# Publishes a GitHub Release with the Windows installers (.msi + setup .exe) and Linux packages.
+# Trigger either by pushing a tag `app-vX.Y.Z` that points at main, or manually ("Run workflow")
+# from main, in which case the tag is derived from src-tauri/tauri.conf.json.
+on:
+  push:
+    tags: ['app-v*.*.*']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  validate-tag:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with: { fetch-depth: 0 }
+      - name: Resolve release tag
+        id: tag
+        shell: bash
+        run: |
+          if [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" ]]; then
+            [[ "$GITHUB_REF" == "refs/heads/main" ]] || { echo 'Run manual releases from main.'; exit 1; }
+            TAG="app-v$(node -p "require('./src-tauri/tauri.conf.json').version")"
+          else
+            TAG="$GITHUB_REF_NAME"
+          fi
+          [[ "$TAG" =~ ^app-v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]] || { echo "Bad tag $TAG"; exit 1; }
+          git merge-base --is-ancestor "$GITHUB_SHA" origin/main || { echo 'Commit is not on main.'; exit 1; }
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+      - name: Refuse an existing release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.tag.outputs.tag }}
+        run: |
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "A GitHub Release already exists for $TAG; bump the version instead of overwriting it."
+            exit 1
+          fi
+  build:
+    needs: validate-tag
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            target: windows-x64
+          - os: ubuntu-24.04
+            target: linux-x64
+          # One universal .dmg for Apple Silicon and Intel Macs (ad-hoc signed, not notarized).
+          - os: macos-latest
+            target: macos-universal
+            tauri_args: --target universal-apple-darwin
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: pnpm/action-setup@7088e561eb65bb68695d245aa206f005ef30921d # v4.1.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+      - name: Install Linux Tauri prerequisites
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y build-essential curl wget file libxdo-dev libssl-dev librsvg2-dev libayatana-appindicator3-dev libwebkit2gtk-4.1-dev
+      - run: pnpm install --frozen-lockfile
+      - name: Frontend gates (format, lint, types, tests)
+        run: pnpm format:check && pnpm lint && pnpm typecheck && pnpm test
+      - name: Rust gates (fmt, clippy, tests)
+        run: cargo fmt --all -- --check && cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace --all-targets
+      - name: Add macOS Rust targets
+        if: runner.os == 'macOS'
+        run: rustup target add aarch64-apple-darwin x86_64-apple-darwin
+      - name: Build native installer
+        env:
+          VITE_API_URL: ${{ vars.VITE_API_URL }}
+        run: pnpm tauri build ${{ matrix.tauri_args }}
+      - name: Collect installers and checksums
+        shell: bash
+        run: |
+          mkdir -p out
+          for d in target/release/bundle src-tauri/target/release/bundle target/universal-apple-darwin/release/bundle src-tauri/target/universal-apple-darwin/release/bundle; do
+            [ -d "$d" ] || continue
+            find "$d" -maxdepth 2 -type f \( -name '*.msi' -o -name '*-setup.exe' -o -name '*.deb' -o -name '*.AppImage' -o -name '*.rpm' -o -name '*.dmg' \) -exec cp {} out/ \;
+          done
+          if [ "$RUNNER_OS" = macOS ]; then
+            ls out/*.dmg >/dev/null 2>&1 || { echo 'No macOS dmg was produced.'; exit 1; }
+          elif [ "$RUNNER_OS" = Windows ]; then
+            ls out/*.msi out/*.exe >/dev/null 2>&1 || { echo 'No MSI or NSIS installer was produced.'; exit 1; }
+          else
+            ls out/*.deb out/*.AppImage >/dev/null 2>&1 || { echo 'No Debian package or AppImage was produced.'; exit 1; }
+          fi
+          (cd out && { if command -v sha256sum >/dev/null; then sha256sum *; else shasum -a 256 *; fi; } > "../SHA256SUMS-${{ matrix.target }}.txt") && mv "SHA256SUMS-${{ matrix.target }}.txt" out/
+          ls -la out
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: desktop-${{ matrix.target }}
+          path: out/*
+          if-no-files-found: error
+          retention-days: 30
+  publish:
+    needs: [validate-tag, build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: read
+    env:
+      TAG: ${{ needs.validate-tag.outputs.tag }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with: { path: release-artifacts, merge-multiple: true }
+      - name: Create GitHub Release (latest, not draft)
+        run: |
+          ls -la release-artifacts
+          gh release create "$TAG" release-artifacts/* \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title "L Platform Student ${TAG#app-}" \
+            --generate-notes \
+            --latest

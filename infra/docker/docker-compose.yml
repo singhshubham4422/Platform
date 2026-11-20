@@ -1,0 +1,34 @@
+name: lplatform-dev
+
+services:
+  postgres:
+    image: postgres:16.2
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DEV_POSTGRES_DB:-lplatform_dev}
+      POSTGRES_USER: ${DEV_POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${DEV_POSTGRES_PASSWORD:?Set DEV_POSTGRES_PASSWORD in the root .env}
+    ports:
+      - "127.0.0.1:${DEV_POSTGRES_PORT:-54331}:5432"
+    volumes:
+      - lplatform-pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  mailpit:
+    image: axllent/mailpit:v1.29.3
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:1025:1025"
+      - "127.0.0.1:8025:8025"
+    healthcheck:
+      test: ["CMD", "/mailpit", "readyz"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  lplatform-pg:
