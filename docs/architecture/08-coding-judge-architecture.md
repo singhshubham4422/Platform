@@ -1,5 +1,7 @@
 # Coding judge architecture
 
+> **Proposed change (2026-11-24):** see [12-offline-first-architecture.md](12-offline-first-architecture.md). It moves code running to the student PC and calculation to Oracle ATP. Until it is accepted and built, this document describes the current design.
+
 ## Current state
 
 L submission routes persist pending submissions and do not call `src/services/evaluator.service.ts`. That service launches Python/Java/C++ as direct child processes and has no OS sandbox; it is expressly documented as unsafe. It must never be connected to production submission handling. J's Compose references a Docker judge, but all referenced Docker/API/worker sources are absent in this workspace.

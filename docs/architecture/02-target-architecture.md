@@ -1,5 +1,7 @@
 # Target architecture
 
+> **Proposed change (2026-11-24):** see [12-offline-first-architecture.md](12-offline-first-architecture.md). It moves code running to the student PC and calculation to Oracle ATP. Until it is accepted and built, this document describes the current design.
+
 ## Decision
 
 Use L_Platform's existing Fastify + TypeScript + Drizzle + PostgreSQL backend as the initial modular monolith and authoritative academic system. This is evidence-based and revises the requested “existing Express” assumption: no Express backend exists in the inspected L project. Keep its deployed database choice if deployment confirms it; do not introduce Oracle or Prisma.

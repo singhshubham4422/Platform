@@ -1,5 +1,7 @@
 # Implementation roadmap
 
+> **Proposed change (2026-11-24):** see [12-offline-first-architecture.md](12-offline-first-architecture.md). It moves code running to the student PC and calculation to Oracle ATP. Until it is accepted and built, this document describes the current design.
+
 | Phase | Scope | Exit evidence | Status in this workspace |
 |---|---|---|---|
 | 0 Audit | Inventory both projects, tests, schemas, routes, gaps and target design | This document set; source availability confirmed | Completed for available files; J source availability is a blocker |
