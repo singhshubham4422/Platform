@@ -10,19 +10,21 @@
 //   node scripts/local-postgres.mjs ensure-test  start + recreate the test DB, migrate and seed it
 //   node scripts/local-postgres.mjs migrate-dev  migrate + seed the dev DB
 import { execFileSync, spawnSync } from 'node:child_process';
-import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, writeFileSync, readdirSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const dataDir = join(root, '.local', 'postgres', 'cluster');
-const logFile = join(root, '.local', 'postgres', 'server.log');
+const dataRoot = resolve(process.env.LOCAL_PG_DATA_DIR || join(root, '.local', 'postgres'));
+const dataDir = join(dataRoot, 'cluster');
+const logFile = join(dataRoot, 'server.log');
 export const PORT = Number(process.env.LOCAL_PG_PORT || 54330);
 const SUPERUSER = 'postgres';
 const APP_USER = 'lplatform';
 const APP_PASSWORD = 'lplatform_dev';
 export const DEV_DB = 'lplatform_dev';
 export const TEST_DB = 'lplatform_test';
+const SUPABASE_TEST_DB = 'lplatform_supabase_test';
 export const devUrl = `postgresql://${APP_USER}:${APP_PASSWORD}@127.0.0.1:${PORT}/${DEV_DB}`;
 export const testUrl = `postgresql://${APP_USER}:${APP_PASSWORD}@127.0.0.1:${PORT}/${TEST_DB}`;
 
@@ -130,6 +132,24 @@ switch (cmd) {
     apiScript('db:migrate', testUrl);
     apiScript('db:seed', testUrl);
     apiScript('test:integration', testUrl);
+    break;
+  }
+  case 'supabase-test': {
+    start();
+    if (psql(`SELECT 1 FROM pg_database WHERE datname='${SUPABASE_TEST_DB}'`)) {
+      throw new Error(`${SUPABASE_TEST_DB} already exists; refusing to reset a database not created by this invocation.`);
+    }
+    psql(`CREATE DATABASE ${SUPABASE_TEST_DB} OWNER postgres`);
+    const created = true;
+    try {
+      const url = `postgresql://postgres@127.0.0.1:${PORT}/${SUPABASE_TEST_DB}`;
+      const applySql = (file) => run('psql', ['-h','127.0.0.1','-p',String(PORT),'-U','postgres','-d',SUPABASE_TEST_DB,'-v','ON_ERROR_STOP=1','-f',file], { stdio:'inherit' });
+      applySql(join(root,'supabase','tests-support','auth-stub.sql'));
+      for (const file of readdirSync(join(root,'supabase','migrations')).filter((n)=>n.endsWith('.sql')).sort()) applySql(join(root,'supabase','migrations',file));
+      run(isWin?'pnpm.cmd':'pnpm',['--filter','@lplatform/supabase-tests','test'],{cwd:root,shell:isWin,env:{...process.env,SUPABASE_TEST_DATABASE_URL:url}});
+    } finally {
+      if (created) psql(`DROP DATABASE ${SUPABASE_TEST_DB} WITH (FORCE)`);
+    }
     break;
   }
   case 'migrate-dev':

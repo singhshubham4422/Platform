@@ -1,0 +1,18 @@
+project_id = "lplatform"
+
+[auth]
+enable_signup = false
+enable_anonymous_sign_ins = false
+
+[auth.email]
+enable_signup = false
+double_confirm_changes = true
+enable_confirmations = false
+otp_expiry = 600
+
+# configured in dashboard: Brevo
+# [auth.email.smtp]
+# host = "smtp-relay.brevo.com"
+# port = 587
+# user = "<configured in dashboard>"
+# password = "<configured in dashboard>"
