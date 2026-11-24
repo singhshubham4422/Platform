@@ -1,0 +1,23 @@
+{
+  "name": "@lplatform/pack-format",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "types": "index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "default": "./index.js"
+    }
+  },
+  "bin": {
+    "lplatform-pack": "bin/pack-builder.mjs"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "lint": "node --check index.js && node --check bin/pack-builder.mjs && node --check test/pack-format.test.mjs"
+  },
+  "dependencies": {
+    "fflate": "0.8.2"
+  }
+}
