@@ -25,6 +25,7 @@
     "test": "pnpm -r --workspace-concurrency=1 test",
     "test:integration": "node scripts/local-postgres.mjs integration",
     "test:supabase": "node scripts/local-postgres.mjs supabase-test",
+    "check:edge-sync": "node supabase/scripts/sync-pack-format.mjs --check",
     "test:e2e": "pnpm --filter @lplatform/web e2e",
     "lint": "pnpm -r lint",
     "typecheck": "pnpm -r typecheck",

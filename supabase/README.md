@@ -56,3 +56,24 @@ Run `pnpm test:supabase` to create a fresh local database, apply the auth stub a
 2. Review and apply migrations with `supabase db push` against the project.
 3. Bootstrap the owner via the Auth Admin API mode.
 4. Request an email OTP and complete a real desktop login.
+
+## Broker
+
+Deploy each function from this repository with `supabase functions deploy <name>`:
+
+```powershell
+supabase functions deploy activity-upload-url
+supabase functions deploy pack-download-url
+supabase functions deploy publish-pack
+supabase functions deploy invite-user
+```
+
+Function secrets are `OCI_TENANCY`, `OCI_USER`, `OCI_FINGERPRINT`, `OCI_PRIVATE_KEY`, `OCI_REGION`, `OCI_NAMESPACE`, `OCI_BUCKET`, `PACK_SIGNING_KEY`, and the Supabase runtime's `SUPABASE_SERVICE_ROLE_KEY`. Supabase supplies `SUPABASE_URL` and `SUPABASE_ANON_KEY`. Configure the origin allowlist, including the dashboard and Tauri origins:
+
+```powershell
+supabase secrets set OCI_TENANCY="<tenancy-ocid>" OCI_USER="<user-ocid>" OCI_FINGERPRINT="<fingerprint>" OCI_PRIVATE_KEY="<pem-private-key>" OCI_REGION="<region>" OCI_NAMESPACE="<namespace>" OCI_BUCKET="<bucket>" PACK_SIGNING_KEY="<base64-ed25519-seed>" ALLOWED_ORIGINS="https://<dashboard-domain>,tauri://localhost,http://tauri.localhost"
+```
+
+Never put these values in a client build. Create the language-pack PAR once in the OCI console for only `packs/lang/`, with read-only access and an owner-managed expiry; set its Object Storage URL as the desktop `VITE_LANG_PACKS_BASE_URL`. The functions do not create that prefix PAR. Keep the bucket private, turn versioning off, and configure a lifecycle policy deleting `raw/activity/` objects after 365 days. Course packs live at `packs/course/{courseId}/{version}.lpack`; the broker returns separate 15-minute read PARs for the pack and detached signature. Activity uploads use a single-object 15-minute write PAR under `raw/activity/`.
+
+Before release, deploy to staging and verify an ObjectWrite PAR uploads a 1 KB gzip only to its scoped activity object, a read PAR downloads a published pack and signature, and both URLs expire. The OCI PAR round trip remains **Blocked** until the owner provides OCI credentials and a staging bucket.

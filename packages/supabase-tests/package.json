@@ -1,1 +1,1 @@
-{"name":"@lplatform/supabase-tests","private":true,"type":"module","scripts":{"test":"node --test"},"devDependencies":{"pg":"=8.23.1"}}
+{"name":"@lplatform/supabase-tests","private":true,"type":"module","scripts":{"test":"node --test test/*.test.mjs ../../supabase/functions/_shared/*.test.mjs"},"devDependencies":{"pg":"=8.23.1"}}
