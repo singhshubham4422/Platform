@@ -1,3 +1,4 @@
+mod runner;
 pub mod runtimes;
 mod store;
 
@@ -228,7 +229,8 @@ pub fn run() {
             runtimes_list,
             runtimes_available,
             runtimes_install,
-            runtimes_remove
+            runtimes_remove,
+            run_custom
         ])
         .run(tauri::generate_context!())
         .expect("error while building tauri application");
@@ -266,6 +268,38 @@ fn runtimes_remove(
     version: String,
 ) -> CmdResult<()> {
     runtimes::runtimes_remove(&state, &manager, &language, &version)
+}
+
+#[tauri::command]
+fn run_custom(
+    language: String,
+    source: String,
+    stdin: String,
+    limits: runner::Limits,
+    state: State<'_, Store>,
+    manager: State<'_, runtimes::RuntimeManager>,
+) -> CmdResult<runner::RunResult> {
+    let language = language.to_ascii_uppercase();
+    let rt = runtimes::resolve(&state, &manager, &language)?;
+    let spec = runner::RunSpec {
+        language,
+        source,
+        tests: vec![runner::TestCase {
+            id: "custom".into(),
+            input: stdin,
+            expected_output: None,
+            hidden: false,
+        }],
+        limits: runner::Limits {
+            time_limit_ms: limits.time_limit_ms.clamp(100, 60_000),
+            memory_limit_mb: limits.memory_limit_mb.clamp(16, 2048),
+            output_limit_kb: limits.output_limit_kb.clamp(1, 1024),
+        },
+        mode: runner::Mode::Custom,
+    };
+    let root = manager.root.join("runner");
+    std::fs::create_dir_all(&root).map_err(|e| format!("IO: {e}"))?;
+    Ok(runner::run_tests(&spec, &rt, &root))
 }
 
 #[cfg(target_os = "windows")]
