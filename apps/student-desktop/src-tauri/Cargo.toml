@@ -17,6 +17,10 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 [build-dependencies]
 tauri-build = { version = "2.7.4", features = [] }
 
+[dev-dependencies]
+tempfile = "=3.23.0"
+rand = "=0.8.5"
+
 [dependencies]
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
@@ -24,6 +28,15 @@ log = "0.4"
 tauri = { version = "2.12.5", features = [] }
 tauri-plugin-log = "2"
 rusqlite = { version = "0.32.1", features = ["bundled"] }
+ed25519-dalek = { version = "=2.2.0", features = ["rand_core"] }
+sha2 = "=0.10.9"
+base64 = "=0.22.1"
+zip = { version = "=2.4.2", default-features = false, features = ["deflate"] }
+reqwest = { version = "=0.12.28", default-features = false, features = ["rustls-tls", "stream", "json"] }
+futures-util = "=0.3.31"
+tokio = { version = "=1.48.0", features = ["fs", "io-util", "process", "time"] }
+uuid = { version = "=1.19.0", features = ["v4"] }
+wait-timeout = "=0.2.1"
 
 [target.'cfg(target_os = "windows")'.dependencies]
 keyring = { version = "4.2.0", default-features = false, features = ["v1", "windows-native-keyring-store"] }

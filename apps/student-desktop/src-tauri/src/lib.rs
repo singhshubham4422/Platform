@@ -1,3 +1,4 @@
+pub mod runtimes;
 mod store;
 
 use std::sync::Mutex;
@@ -192,6 +193,7 @@ pub fn run() {
             let conn = store::open(&dir.join("lplatform.db"))
                 .map_err(|e| format!("cannot open local database: {e}"))?;
             app.manage(Store(Mutex::new(conn)));
+            app.manage(runtimes::RuntimeManager::new(dir.clone()));
             if cfg!(debug_assertions) {
                 app.handle().plugin(
                     tauri_plugin_log::Builder::default()
@@ -222,10 +224,48 @@ pub fn run() {
             store_delete_course,
             store_set_cursor,
             store_get_cursor,
-            store_import_legacy
+            store_import_legacy,
+            runtimes_list,
+            runtimes_available,
+            runtimes_install,
+            runtimes_remove
         ])
         .run(tauri::generate_context!())
         .expect("error while building tauri application");
+}
+
+#[tauri::command]
+fn runtimes_list(state: State<'_, Store>) -> CmdResult<Vec<runtimes::RuntimeInfo>> {
+    runtimes::runtimes_list(&state)
+}
+
+#[tauri::command]
+async fn runtimes_available(
+    base_url: String,
+    manager: State<'_, runtimes::RuntimeManager>,
+) -> CmdResult<Vec<runtimes::IndexEntry>> {
+    runtimes::runtimes_available(base_url, &manager).await
+}
+
+#[tauri::command]
+async fn runtimes_install(
+    app: tauri::AppHandle,
+    state: State<'_, Store>,
+    manager: State<'_, runtimes::RuntimeManager>,
+    base_url: String,
+    language: String,
+) -> CmdResult<runtimes::RuntimeInfo> {
+    runtimes::runtimes_install(app, &state, &manager, base_url, language).await
+}
+
+#[tauri::command]
+fn runtimes_remove(
+    state: State<'_, Store>,
+    manager: State<'_, runtimes::RuntimeManager>,
+    language: String,
+    version: String,
+) -> CmdResult<()> {
+    runtimes::runtimes_remove(&state, &manager, &language, &version)
 }
 
 #[cfg(target_os = "windows")]

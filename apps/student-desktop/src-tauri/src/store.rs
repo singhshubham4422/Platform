@@ -11,9 +11,10 @@ use std::sync::Mutex;
 pub struct Store(pub Mutex<Connection>);
 
 /// Ordered, append-only migrations. Never edit a released entry; add a new one.
-const MIGRATIONS: &[(i64, &str)] = &[(
-    1,
-    r#"
+const MIGRATIONS: &[(i64, &str)] = &[
+    (
+        1,
+        r#"
     CREATE TABLE code_drafts (
         question_id   TEXT NOT NULL,
         assignment_id TEXT NOT NULL DEFAULT '',
@@ -57,7 +58,21 @@ const MIGRATIONS: &[(i64, &str)] = &[(
     );
     CREATE TABLE app_meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
     "#,
-)];
+    ),
+    (
+        2,
+        r#"
+    CREATE TABLE runtimes (
+        language TEXT NOT NULL,
+        version TEXT NOT NULL,
+        path TEXT NOT NULL,
+        sha256 TEXT NOT NULL,
+        installed_at TEXT NOT NULL,
+        PRIMARY KEY (language, version)
+    );
+    "#,
+    ),
+];
 
 pub fn open(path: &Path) -> rusqlite::Result<Connection> {
     let mut conn = Connection::open(path)?;
@@ -374,6 +389,56 @@ pub fn list_courses(conn: &Connection) -> rusqlite::Result<Vec<String>> {
     rows.collect()
 }
 
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
+#[serde(rename_all = "camelCase")]
+pub struct RuntimeRow {
+    pub language: String,
+    pub version: String,
+    pub path: String,
+    pub sha256: String,
+    pub installed_at: String,
+}
+
+pub fn runtimes_list(conn: &Connection) -> rusqlite::Result<Vec<RuntimeRow>> {
+    let mut stmt = conn.prepare("SELECT language, version, path, sha256, installed_at FROM runtimes ORDER BY language, installed_at DESC")?;
+    stmt.query_map([], |r| {
+        Ok(RuntimeRow {
+            language: r.get(0)?,
+            version: r.get(1)?,
+            path: r.get(2)?,
+            sha256: r.get(3)?,
+            installed_at: r.get(4)?,
+        })
+    })?
+    .collect()
+}
+
+pub fn runtimes_get(
+    conn: &Connection,
+    language: &str,
+    version: &str,
+) -> rusqlite::Result<Option<RuntimeRow>> {
+    conn.query_row("SELECT language, version, path, sha256, installed_at FROM runtimes WHERE language=?1 AND version=?2", params![language, version], |r| Ok(RuntimeRow {
+        language:r.get(0)?, version:r.get(1)?, path:r.get(2)?, sha256:r.get(3)?, installed_at:r.get(4)?,
+    })).optional()
+}
+
+pub fn runtimes_put(conn: &Connection, row: &RuntimeRow) -> rusqlite::Result<()> {
+    conn.execute("INSERT INTO runtimes(language,version,path,sha256,installed_at) VALUES(?1,?2,?3,?4,?5) ON CONFLICT(language,version) DO UPDATE SET path=excluded.path,sha256=excluded.sha256,installed_at=excluded.installed_at", params![row.language,row.version,row.path,row.sha256,row.installed_at])?;
+    Ok(())
+}
+
+pub fn runtimes_remove(
+    conn: &Connection,
+    language: &str,
+    version: &str,
+) -> rusqlite::Result<usize> {
+    conn.execute(
+        "DELETE FROM runtimes WHERE language=?1 AND version=?2",
+        params![language, version],
+    )
+}
+
 pub fn delete_course(conn: &Connection, course_id: &str) -> rusqlite::Result<usize> {
     conn.execute("DELETE FROM course_cache WHERE course_id = ?1", [course_id])
 }
@@ -436,6 +501,47 @@ pub fn import_legacy(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn runtime_migration_adds_only_the_runtime_table_to_existing_store() {
+        let mut conn = Connection::open_in_memory().unwrap();
+        conn.execute_batch("CREATE TABLE local_schema_migrations(version INTEGER PRIMARY KEY, applied_at TEXT NOT NULL);").unwrap();
+        conn.execute_batch(MIGRATIONS[0].1).unwrap();
+        conn.execute(
+            "INSERT INTO local_schema_migrations(version, applied_at) VALUES(1, 'before')",
+            [],
+        )
+        .unwrap();
+        let before: Vec<String> = {
+            let mut stmt = conn
+                .prepare("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name")
+                .unwrap();
+            stmt.query_map([], |row| row.get(0))
+                .unwrap()
+                .collect::<rusqlite::Result<_>>()
+                .unwrap()
+        };
+        migrate(&mut conn).unwrap();
+        let after: Vec<String> = {
+            let mut stmt = conn
+                .prepare("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name")
+                .unwrap();
+            stmt.query_map([], |row| row.get(0))
+                .unwrap()
+                .collect::<rusqlite::Result<_>>()
+                .unwrap()
+        };
+        assert!(before.iter().all(|name| after.contains(name)));
+        assert!(after.contains(&"runtimes".to_string()));
+        let migration: i64 = conn
+            .query_row(
+                "SELECT version FROM local_schema_migrations WHERE version=2",
+                [],
+                |r| r.get(0),
+            )
+            .unwrap();
+        assert_eq!(migration, 2);
+    }
 
     fn mem() -> Connection {
         let mut c = Connection::open_in_memory().unwrap();
