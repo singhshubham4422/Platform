@@ -7,6 +7,7 @@ import { Login } from './components/Login';
 import { Dashboard, type StudentSection } from './components/Dashboard';
 import { CoursesView, MyResultsView, NotificationsView, PracticeView, StudentSettings } from './workspace/StudentViews';
 import { fetchNotifications } from './lib/coding-api';
+import { PlatformHome } from './platform/PlatformHome';
 
 interface OpenQuestion {
   questionId: string;
@@ -157,6 +158,8 @@ export const App: React.FC = () => {
           <StudentSettings user={user} isOnline={isOnline} onLogout={logout} />
         ) : section === 'workspace' ? (
           <PracticeView onOpen={(questionId) => setOpen({ questionId, assignmentId: null, courseId: null, returnTo: 'workspace' })} />
+        ) : section === 'platform' && import.meta.env.VITE_OFFLINE_FIRST === '1' ? (
+          <PlatformHome />
         ) : (
           <Dashboard
             user={user}

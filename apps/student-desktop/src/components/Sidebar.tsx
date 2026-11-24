@@ -23,7 +23,7 @@ import {
 import type { User } from '../types';
 import type { StudentSection } from './Dashboard';
 
-export type AppSection = StudentSection | 'courses' | 'challenges' | 'notifications' | 'workspace';
+export type AppSection = StudentSection | 'courses' | 'challenges' | 'notifications' | 'workspace' | 'platform';
 
 export const NAV_ITEMS: Array<{ id: AppSection; label: string; icon: LucideIcon }> = [
   { id: 'overview', label: 'Home', icon: Home },
@@ -37,6 +37,7 @@ export const NAV_ITEMS: Array<{ id: AppSection; label: string; icon: LucideIcon 
   { id: 'results', label: 'Results', icon: Trophy },
   { id: 'library', label: 'Library', icon: Library },
   { id: 'notifications', label: 'Notifications', icon: Bell },
+  ...(import.meta.env.VITE_OFFLINE_FIRST === '1' ? [{ id: 'platform' as const, label: 'Platform', icon: Library }] : []),
 ];
 
 interface SidebarProps {

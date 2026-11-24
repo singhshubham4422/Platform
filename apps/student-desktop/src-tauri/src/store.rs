@@ -10,6 +10,50 @@ use std::sync::Mutex;
 
 pub struct Store(pub Mutex<Connection>);
 
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct PackRow {
+    pub pack_id: String,
+    pub kind: String,
+    pub course_id: String,
+    pub assessment_id: Option<String>,
+    pub version: i64,
+    pub title: String,
+    pub path: String,
+    pub sha256: String,
+    pub manifest_json: String,
+    pub installed_at: String,
+}
+
+pub fn packs_list(conn: &Connection) -> rusqlite::Result<Vec<PackRow>> {
+    let mut s=conn.prepare("SELECT pack_id,kind,course_id,assessment_id,version,title,path,sha256,manifest_json,installed_at FROM packs ORDER BY title COLLATE NOCASE")?;
+    s.query_map([], |r| {
+        Ok(PackRow {
+            pack_id: r.get(0)?,
+            kind: r.get(1)?,
+            course_id: r.get(2)?,
+            assessment_id: r.get(3)?,
+            version: r.get(4)?,
+            title: r.get(5)?,
+            path: r.get(6)?,
+            sha256: r.get(7)?,
+            manifest_json: r.get(8)?,
+            installed_at: r.get(9)?,
+        })
+    })?
+    .collect()
+}
+pub fn packs_get(conn: &Connection, id: &str) -> rusqlite::Result<Option<PackRow>> {
+    conn.query_row("SELECT pack_id,kind,course_id,assessment_id,version,title,path,sha256,manifest_json,installed_at FROM packs WHERE pack_id=?1",[id],|r|Ok(PackRow{pack_id:r.get(0)?,kind:r.get(1)?,course_id:r.get(2)?,assessment_id:r.get(3)?,version:r.get(4)?,title:r.get(5)?,path:r.get(6)?,sha256:r.get(7)?,manifest_json:r.get(8)?,installed_at:r.get(9)?})).optional()
+}
+pub fn packs_put(conn: &Connection, p: &PackRow) -> rusqlite::Result<()> {
+    conn.execute("INSERT OR REPLACE INTO packs(pack_id,kind,course_id,assessment_id,version,title,path,sha256,manifest_json,installed_at) VALUES(?1,?2,?3,?4,?5,?6,?7,?8,?9,?10)",params![p.pack_id,p.kind,p.course_id,p.assessment_id,p.version,p.title,p.path,p.sha256,p.manifest_json,p.installed_at])?;
+    Ok(())
+}
+pub fn packs_remove(conn: &Connection, id: &str) -> rusqlite::Result<usize> {
+    conn.execute("DELETE FROM packs WHERE pack_id=?1", [id])
+}
+
 /// Ordered, append-only migrations. Never edit a released entry; add a new one.
 const MIGRATIONS: &[(i64, &str)] = &[
     (
@@ -69,6 +113,23 @@ const MIGRATIONS: &[(i64, &str)] = &[
         sha256 TEXT NOT NULL,
         installed_at TEXT NOT NULL,
         PRIMARY KEY (language, version)
+    );
+    "#,
+    ),
+    (
+        3,
+        r#"
+    CREATE TABLE packs (
+        pack_id TEXT PRIMARY KEY,
+        kind TEXT NOT NULL,
+        course_id TEXT,
+        assessment_id TEXT,
+        version INTEGER NOT NULL,
+        title TEXT NOT NULL,
+        path TEXT NOT NULL,
+        sha256 TEXT NOT NULL,
+        manifest_json TEXT NOT NULL,
+        installed_at TEXT NOT NULL
     );
     "#,
     ),

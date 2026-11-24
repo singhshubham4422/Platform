@@ -20,6 +20,8 @@ export interface ActivityEvent {
   questionId?: string | null;
   assignmentId?: string | null;
   courseId?: string | null;
+  /** ADDED BY PHASE 04: identifies activity from an offline course pack. */
+  packId?: string | null;
   attemptId?: string | null;
   deviceSessionId?: string | null;
   schemaVersion: number;

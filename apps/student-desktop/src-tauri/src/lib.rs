@@ -1,3 +1,4 @@
+mod packs;
 mod runner;
 pub mod runtimes;
 mod store;
@@ -195,6 +196,7 @@ pub fn run() {
                 .map_err(|e| format!("cannot open local database: {e}"))?;
             app.manage(Store(Mutex::new(conn)));
             app.manage(runtimes::RuntimeManager::new(dir.clone()));
+            app.manage(packs::PackManager::new(dir.clone()));
             if cfg!(debug_assertions) {
                 app.handle().plugin(
                     tauri_plugin_log::Builder::default()
@@ -230,7 +232,14 @@ pub fn run() {
             runtimes_available,
             runtimes_install,
             runtimes_remove,
-            run_custom
+            run_custom,
+            packs_install_from_url,
+            packs_import_file,
+            packs_list,
+            packs_remove,
+            packs_list_questions,
+            packs_get_question,
+            run_question
         ])
         .run(tauri::generate_context!())
         .expect("error while building tauri application");
@@ -300,6 +309,75 @@ fn run_custom(
     let root = manager.root.join("runner");
     std::fs::create_dir_all(&root).map_err(|e| format!("IO: {e}"))?;
     Ok(runner::run_tests(&spec, &rt, &root))
+}
+
+#[tauri::command]
+async fn packs_install_from_url(
+    url: String,
+    sig_url: String,
+    expected_sha256: String,
+    state: State<'_, Store>,
+    manager: State<'_, packs::PackManager>,
+) -> CmdResult<packs::PackInfo> {
+    packs::packs_install_from_url(&state, &manager, &url, &sig_url, &expected_sha256).await
+}
+#[tauri::command]
+fn packs_import_file(
+    path: String,
+    state: State<'_, Store>,
+    manager: State<'_, packs::PackManager>,
+) -> CmdResult<packs::PackInfo> {
+    packs::packs_import_file(&state, &manager, &path)
+}
+#[tauri::command]
+fn packs_list(state: State<'_, Store>) -> CmdResult<Vec<packs::PackInfo>> {
+    packs::packs_list(&state)
+}
+#[tauri::command]
+fn packs_remove(
+    pack_id: String,
+    state: State<'_, Store>,
+    manager: State<'_, packs::PackManager>,
+) -> CmdResult<()> {
+    packs::packs_remove(&state, &manager, &pack_id)
+}
+#[tauri::command]
+fn packs_list_questions(
+    pack_id: String,
+    state: State<'_, Store>,
+) -> CmdResult<Vec<packs::QuestionSummary>> {
+    packs::packs_list_questions(&state, &pack_id)
+}
+#[tauri::command]
+fn packs_get_question(
+    pack_id: String,
+    question_id: String,
+    state: State<'_, Store>,
+) -> CmdResult<packs::QuestionView> {
+    packs::packs_get_question(&state, &pack_id, &question_id)
+}
+#[tauri::command]
+#[allow(clippy::too_many_arguments)]
+fn run_question(
+    pack_id: String,
+    question_id: String,
+    language: String,
+    source: String,
+    mode: String,
+    state: State<'_, Store>,
+    pack_manager: State<'_, packs::PackManager>,
+    runtime_manager: State<'_, runtimes::RuntimeManager>,
+) -> CmdResult<runner::RunResult> {
+    packs::run_question(
+        &state,
+        &pack_manager,
+        &runtime_manager,
+        &pack_id,
+        &question_id,
+        &language,
+        &source,
+        &mode,
+    )
 }
 
 #[cfg(target_os = "windows")]
