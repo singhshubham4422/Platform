@@ -1,0 +1,40 @@
+{
+  "name": "@lplatform/dashboard",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build && node scripts/check-dist.mjs",
+    "build:e2e": "tsc --noEmit && vite build --mode test",
+    "preview": "vite preview",
+    "lint": "node scripts/check-test-imports.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:e2e": "playwright test"
+  },
+  "dependencies": {
+    "@lplatform/language-config": "workspace:*",
+    "@supabase/supabase-js": "^2.58.0",
+    "react": "19.1.10",
+    "react-dom": "19.1.10",
+    "react-router-dom": "^7.9.0",
+    "recharts": "^2.15.4"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.65.0",
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/node": "^24.10.0",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "@vitejs/plugin-react": "^4.7.0",
+    "jsdom": "^26.1.0",
+    "typescript": "5.9.3",
+    "vite": "^6.2.0",
+    "vitest": "^4.1.12"
+  }
+}
