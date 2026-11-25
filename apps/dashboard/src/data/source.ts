@@ -2,6 +2,7 @@ import type {
   Assessment,
   AssessmentInput,
   AssessmentRow,
+  TeacherAssessmentResults,
   ClassMemberRow,
   ClassRow,
   ClassStudentRow,
@@ -63,6 +64,7 @@ export interface DataSource {
   getAssessment(assessmentId: string): Promise<{ assessment: Assessment; questions: Question[] }>;
   saveAssessment(input: AssessmentInput): Promise<Assessment>;
   publishAssessment(assessmentId: string): Promise<PublishResult>;
+  teacherAssessmentResults(assessmentId: string): Promise<TeacherAssessmentResults>;
 
   adminDepartments(): Promise<Department[]>;
   saveDepartment(input: { id?: string; organizationId: string; name: string; code: string }): Promise<Department>;

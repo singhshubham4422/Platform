@@ -9,3 +9,4 @@ export const conflict=(code='CONFLICT',message='Request conflicts with existing 
 export const tooLarge=(message='Request body is too large')=>new HttpError(413,'PAYLOAD_TOO_LARGE',message);
 export const unavailable=(code='SERVICE_UNAVAILABLE',message='Service is unavailable')=>new HttpError(503,code,message);
 export const notImplemented=(code,message)=>new HttpError(501,code,message);
+export const denied=(code,message)=>new HttpError(403,code,message);

@@ -180,6 +180,34 @@ describe('publish errors', () => {
   });
 });
 
+describe('phase 10 assessments', () => {
+  it('schedules a draft from the assessment page and shows the pack version', async () => {
+    const user = userEvent.setup();
+    await renderApp({ email: 'TEACHER', hash: '#/teacher/assessments/99999999-9999-4999-8999-999999999991' });
+    expect(await screen.findByRole('heading', { name: 'Mid-semester assessment' })).toBeTruthy();
+    const schedule = screen.getByRole('button', { name: 'Schedule' });
+    expect((schedule as HTMLButtonElement).disabled).toBe(false);
+    await user.click(schedule);
+    expect(await screen.findByText(/Pack v\d+ scheduled\./)).toBeTruthy();
+  });
+
+  it('shows late, re-check and final verdict labels on the teacher results screen', async () => {
+    await renderApp({ email: 'TEACHER', hash: '#/teacher/assessments/99999999-9999-4999-8999-999999999991/results' });
+    expect(await screen.findByRole('heading', { name: 'Mid-semester assessment results' })).toBeTruthy();
+    expect((await screen.findAllByText('Pending')).length).toBeGreaterThan(0);
+    expect(screen.getByText('Finished offline synced late')).toBeTruthy();
+    expect(screen.getByText('Wrong answer')).toBeTruthy();
+    expect(screen.getByRole('spinbutton', { name: 'Override' })).toBeTruthy();
+  });
+
+  it('does not show student final results before the assessment closes', async () => {
+    await renderApp({ email: 'STUDENT', hash: '#/student/assessments' });
+    expect(await screen.findByText('Mid-semester assessment')).toBeTruthy();
+    expect(screen.getByText('Results are published after the assessment closes.')).toBeTruthy();
+    expect(screen.queryByText('Final at close:')).toBeNull();
+  });
+});
+
 describe('runtime configuration', () => {
   it('reports NOT_CONFIGURED with no project and no fallback', async () => {
     const runtime = await createRuntime({ MODE: 'production' });

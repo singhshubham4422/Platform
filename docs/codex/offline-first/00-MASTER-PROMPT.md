@@ -260,9 +260,9 @@ device(id INTEGER PRIMARY KEY CHECK(id = 1), device_id TEXT, public_key TEXT, mo
 | `activity-upload-url` | `{ batchId, sizeBytes, sha256 }` | `{ uploadUrl, objectPath, expiresAt }` | `sizeBytes` ≤ 5 MB; path per C3 using the caller's org and id; PAR is `ObjectWrite`, 15 minutes, single object |
 | `pack-download-url` | `{ packId }` | `{ url, sigUrl, sha256, size, expiresAt }` | Caller must be enrolled (C9 `rls_can_read_pack`); 15 minutes |
 | `publish-pack` | `{ courseId }` or `{ assessmentId }` | `{ packId, version, objectPath, sha256, size }` | Teacher of that course/assessment or college admin; builds the pack with `packages/pack-format`; signs with `PACK_SIGNING_KEY` |
-| `assessment-key` | `{ assessmentId }` | `{ keyId, keyB64, closesAt }` | Phase 10; only enrolled students, only between `opensAt` and `closesAt`; every issue recorded in `assessment_key_issues` |
-| `register-device` | `{ deviceId, publicKey }` | `{ ok: true }` | Phase 10; one row per user and device |
-| `submit-assessment-attempts` | `{ attempts: [...] }` (≤ 20) | `{ accepted, duplicates, rejected }` | Phase 10; the only way assessment submissions are stored; verifies the device signature and applies the attempts limit, late rule and re-check queue |
+| `assessment-key` | `{ assessmentId }` | `{ keyId, keyB64, closesAt }` | Phase 10; only enrolled students, only between `opensAt` and `closesAt`; every issue recorded in `assessment_key_issues` (`ADDED BY PHASE 10`) |
+| `register-device` | `{ deviceId, publicKey }` | `{ ok: true }` | Phase 10; one row per user and device; a different key for an existing device returns `409 DEVICE_KEY_MISMATCH` (`ADDED BY PHASE 10`) |
+| `submit-assessment-attempts` | `{ attempts: [...] }` (≤ 20) | `{ accepted, duplicates, rejected }` | Phase 10; the only way assessment submissions are stored; verifies the device signature and applies the attempts limit, late rule and re-check queue (`ADDED BY PHASE 10`) |
 | `invite-user` | `{ email, fullName, role, organizationId, classIds? }` | `{ userId, invited: true }` | Phase 07; college admin (own org, roles `STUDENT`/`TEACHER`/`COLLEGE_ADMIN`) or platform owner (any). Creates the auth user (no password; OTP login) and the profile, and adds class memberships. |
 
 - Errors: HTTP 400, 401, 403, 404, 409, 413 or 503 with `{ "error": "<CODE>", "message": "<text>" }`. 
@@ -271,6 +271,7 @@ device(id INTEGER PRIMARY KEY CHECK(id = 1), device_id TEXT, public_key TEXT, mo
 #### C9. Supabase tables (schema `public`; phase 06 owns them; everything else only reads/writes them)
 `organizations, profiles, departments, classes, class_members, courses, questions, question_tests, class_courses, assessments, assessment_keys, course_pack_versions, submissions, feedback, devices, assessment_key_issues, kpi_student_daily, kpi_student_topic, kpi_assessment`, the view `kpi_class_daily`, and the functions `app_role()`, `app_org()`, `rls_is_class_teacher(class_id)`, `rls_is_class_member(class_id)`, `rls_can_read_course(course_id)`, `rls_can_read_pack(pack_id)`, `rls_can_manage_course(course_id)`. Columns are defined in `06-supabase-schema-rls-auth.md` and are frozen from then on.
 - Students never read `question_tests` rows of kind `HIDDEN`. Nobody except `service_role` reads `assessment_keys`.
+- `ADDED BY PHASE 10`: the views `assessment_results` (final verdict, late status, re-check status, attempts used, best attempt, points earned) and `assessment_user_results` (score, solved, pending re-checks) are `security_invoker`; `claim_recheck()` is `security definer` and executable by `service_role` only. Students still cannot insert assessment `submissions` directly (RLS requires `assessment_id IS NULL`).
 
 - Roles in `profiles.role`: `STUDENT`, `TEACHER`, `COLLEGE_ADMIN`, `PLATFORM_OWNER`.
 - `submissions.id` equals the desktop `attemptId`, so syncing twice is idempotent (`on conflict do nothing`).

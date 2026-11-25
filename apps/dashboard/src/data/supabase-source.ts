@@ -3,6 +3,9 @@ import type {
   Assessment,
   AssessmentInput,
   AssessmentRow,
+  AssessmentResultRow,
+  AssessmentUserResult,
+  TeacherAssessmentResults,
   ClassMemberRow,
   ClassRow,
   ClassStudentRow,
@@ -138,7 +141,7 @@ export class SupabaseDataSource implements DataSource {
 
   async studentAssessments(userId: string): Promise<StudentAssessmentResult[]> {
     const [assessments, results, submissions] = await Promise.all([
-      run<Assessment[]>(this.sb.from('assessments').select('*').eq('status', 'SCHEDULED').order('opens_at')),
+      run<Assessment[]>(this.sb.from('assessments').select('*').in('status', ['SCHEDULED', 'CLOSED']).order('opens_at')),
       run<KpiAssessment[]>(this.sb.from('kpi_assessment').select('*').eq('user_id', userId)),
       run<Array<Pick<Submission, 'id' | 'assessment_id'>>>(this.sb.from('submissions').select('id,assessment_id').eq('user_id', userId)),
     ]);
@@ -146,10 +149,21 @@ export class SupabaseDataSource implements DataSource {
     const feedback = submissionIds.length
       ? await run<Feedback[]>(this.sb.from('feedback').select('*').in('submission_id', submissionIds).eq('released', true))
       : [];
+    const closedIds = assessments.filter((a) => a.status === 'CLOSED').map((a) => a.id);
+    const [rows, totals] = closedIds.length
+      ? await Promise.all([
+          run<AssessmentResultRow[]>(this.sb.from('assessment_results').select('*').eq('user_id', userId).in('assessment_id', closedIds)),
+          run<AssessmentUserResult[]>(this.sb.from('assessment_user_results').select('*').eq('user_id', userId).in('assessment_id', closedIds)),
+        ])
+      : [[] as AssessmentResultRow[], [] as AssessmentUserResult[]];
     return assessments.map((assessment) => ({
       assessment,
-      result: results.find((r) => r.assessment_id === assessment.id) ?? null,
-      feedback: feedback.filter((f) => submissionIds.includes(f.submission_id) && submissions.find((s) => s.id === f.submission_id)?.assessment_id === assessment.id),
+      result: assessment.status === 'CLOSED' ? results.find((r) => r.assessment_id === assessment.id) ?? null : null,
+      feedback: assessment.status === 'CLOSED'
+        ? feedback.filter((f) => submissionIds.includes(f.submission_id) && submissions.find((s) => s.id === f.submission_id)?.assessment_id === assessment.id)
+        : [],
+      results: rows.filter((r) => r.assessment_id === assessment.id),
+      total: totals.find((t) => t.assessment_id === assessment.id) ?? null,
     }));
   }
 
@@ -410,6 +424,19 @@ export class SupabaseDataSource implements DataSource {
 
   async publishAssessment(assessmentId: string): Promise<PublishResult> {
     return this.callFunction<PublishResult>('publish-pack', { assessmentId });
+  }
+
+  async teacherAssessmentResults(assessmentId: string): Promise<TeacherAssessmentResults> {
+    const [rows, totals, kpi] = await Promise.all([
+      run<AssessmentResultRow[]>(this.sb.from('assessment_results').select('*').eq('assessment_id', assessmentId)),
+      run<AssessmentUserResult[]>(this.sb.from('assessment_user_results').select('*').eq('assessment_id', assessmentId)),
+      run<KpiAssessment[]>(this.sb.from('kpi_assessment').select('*').eq('assessment_id', assessmentId)),
+    ]);
+    const userIds = Array.from(new Set([...rows.map((r) => r.user_id), ...totals.map((t) => t.user_id), ...kpi.map((k) => k.user_id)]));
+    const profiles = userIds.length
+      ? await run<Profile[]>(this.sb.from('profiles').select('*').in('id', userIds).order('full_name'))
+      : [];
+    return { rows, totals, kpi, profiles };
   }
 
   async adminDepartments(): Promise<Department[]> {

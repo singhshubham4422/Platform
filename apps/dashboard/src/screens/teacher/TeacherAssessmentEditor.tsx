@@ -24,6 +24,7 @@ export function TeacherAssessmentEditor() {
   const source = useDataSource();
   const detail = useAsync(() => source.getAssessment(assessmentId), [assessmentId]);
   const [saving, setSaving] = useState(false);
+  const [publishing, setPublishing] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -62,6 +63,21 @@ export function TeacherAssessmentEditor() {
     }
   };
 
+  const onSchedule = async () => {
+    setPublishing(true);
+    setNotice(null);
+    setError(null);
+    try {
+      const published = await source.publishAssessment(assessment.id);
+      setNotice(`Pack v${published.version} scheduled.`);
+      detail.reload();
+    } catch (cause) {
+      setError(errorText(cause));
+    } finally {
+      setPublishing(false);
+    }
+  };
+
   return (
     <>
       <PageHeader
@@ -69,9 +85,14 @@ export function TeacherAssessmentEditor() {
         title={assessment.title}
         description={`${assessment.status} · ${questions.length} questions · ${profile?.role === 'TEACHER' ? 'teacher' : 'staff'}`}
         actions={
-          <Link className="btn btn-small" to="/teacher/assessments">
-            All assessments
-          </Link>
+          <div className="inline">
+            <Link className="btn btn-small" to={`/teacher/assessments/${assessment.id}/results`}>
+              Results
+            </Link>
+            <Link className="btn btn-small" to="/teacher/assessments">
+              All assessments
+            </Link>
+          </div>
         }
       />
       <div aria-live="polite" className="stack">
@@ -118,16 +139,25 @@ export function TeacherAssessmentEditor() {
       </Card>
       <Card
         title="Scheduling"
-        description="Scheduling publishes an encrypted assessment pack and fixes the key."
+        description="Scheduling publishes an encrypted assessment pack and fixes the key until the assessment opens."
         actions={
-          <button type="button" className="btn" disabled title="Available in phase 10">
-            Schedule
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={() => void onSchedule()}
+            disabled={publishing || !['DRAFT', 'SCHEDULED'].includes(assessment.status)}
+          >
+            {publishing ? 'Scheduling�' : 'Schedule'}
           </button>
         }
       >
-        <InlineInfo>
-          Scheduling is available in phase 10. {/* TODO(offline-integration): enable assessment scheduling in phase 10 */}
-        </InlineInfo>
+        {assessment.status === 'DRAFT' ? (
+          <InlineInfo>A draft pack is built with encrypted hidden tests. Republish before opening to add questions; the key stays the same.</InlineInfo>
+        ) : assessment.status === 'SCHEDULED' ? (
+          <InlineInfo>Students can download the pack. Republishing before opening keeps the key; after opening it returns ASSESSMENT_STARTED.</InlineInfo>
+        ) : (
+          <InlineInfo>This assessment is closed.</InlineInfo>
+        )}
       </Card>
       <Card title="Questions" description={`Opens ${formatDateTime(assessment.opens_at)} · closes ${formatDateTime(assessment.closes_at)}`}>
         {questions.length === 0 ? (

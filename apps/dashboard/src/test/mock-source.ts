@@ -1,6 +1,9 @@
 import type {
   Assessment,
   AssessmentInput,
+  AssessmentResultRow,
+  AssessmentUserResult,
+  TeacherAssessmentResults,
   ClassMemberRow,
   ClassRow,
   ClassStudentRow,
@@ -390,6 +393,61 @@ export function createMockSource(options: MockOptions = {}): DataSource {
     return { daily, streak: Math.min(activeDays.size, 3), solved: solved.size, attempted: attempted.size };
   };
 
+  function assessmentRows(assessmentId: string, userId: string | null, includeUnreleased: boolean): AssessmentResultRow[] {
+    const assessment = state.assessments.find((row) => row.id === assessmentId);
+    if (!assessment) return [];
+    const submissions = state.submissions.filter((row) => row.assessment_id === assessmentId && (!userId || row.user_id === userId));
+    const grouped = new Map<string, Submission[]>();
+    for (const row of submissions) {
+      const key = `${row.user_id}/${row.question_id}`;
+      grouped.set(key, [...(grouped.get(key) ?? []), row]);
+    }
+    const out: AssessmentResultRow[] = [];
+    for (const attempts of grouped.values()) {
+      const final = (row: Submission) => (assessment.high_stakes && row.recheck_status === 'DONE' ? row.recheck_verdict : row.verdict);
+      const best = [...attempts].sort((a, b) => {
+        const accepted = Number(final(b) === 'ACCEPTED') - Number(final(a) === 'ACCEPTED');
+        return accepted !== 0 ? accepted : b.received_at.localeCompare(a.received_at);
+      })[0]!;
+      const question = state.questions.find((row) => row.id === best.question_id);
+      const override = state.feedback
+        .filter((row) => row.submission_id === best.id && row.score_override !== null && (includeUnreleased || row.released))
+        .sort((a, b) => b.created_at.localeCompare(a.created_at))[0]?.score_override ?? null;
+      const points = override ?? (final(best) === 'ACCEPTED' && best.late_status !== 'LATE' && (!assessment.high_stakes || best.recheck_status === 'DONE') ? question?.points ?? 0 : 0);
+      out.push({
+        user_id: best.user_id,
+        assessment_id: assessmentId,
+        question_id: best.question_id,
+        best_attempt_id: best.id,
+        final_verdict: final(best),
+        late_status: best.late_status,
+        recheck_status: best.recheck_status,
+        passed: best.passed,
+        total: best.total,
+        attempts_used: attempts.length,
+        question_points: question?.points ?? 0,
+        points_earned: points,
+        score_override: override,
+        best_received_at: best.received_at,
+      });
+    }
+    return out.sort((a, b) => a.user_id.localeCompare(b.user_id) || a.question_id.localeCompare(b.question_id));
+  }
+
+  function assessmentTotals(rows: AssessmentResultRow[]): AssessmentUserResult[] {
+    const byUser = new Map<string, AssessmentResultRow[]>();
+    for (const row of rows) byUser.set(row.user_id, [...(byUser.get(row.user_id) ?? []), row]);
+    return [...byUser.entries()].map(([userId, userRows]) => ({
+      user_id: userId,
+      assessment_id: userRows[0]!.assessment_id,
+      questions: userRows.length,
+      solved: userRows.filter((row) => row.final_verdict === 'ACCEPTED').length,
+      score: userRows.reduce((sum, row) => sum + Number(row.points_earned), 0),
+      pending_rechecks: userRows.filter((row) => row.recheck_status === 'QUEUED' || row.recheck_status === 'RUNNING').length,
+      max_attempts_used: Math.max(...userRows.map((row) => row.attempts_used)),
+    }));
+  }
+
   return {
     studentOverview,
     async studentTopics(userId) {
@@ -411,15 +469,21 @@ export function createMockSource(options: MockOptions = {}): DataSource {
       if (empty) return [];
       return state.assessments
         .filter((row) => row.status !== 'DRAFT')
-        .map((assessment) => ({
-          assessment,
-          result: state.kpiAssessment.find((row) => row.assessment_id === assessment.id && row.user_id === userId) ?? null,
-          feedback: state.feedback.filter((entry) => {
-            if (!entry.released) return false;
-            const submission = state.submissions.find((row) => row.id === entry.submission_id);
-            return submission?.assessment_id === assessment.id && submission.user_id === userId;
-          }),
-        }));
+        .map((assessment) => {
+          const closed = assessment.status === 'CLOSED';
+          const rows = closed ? assessmentRows(assessment.id, userId, false) : [];
+          return {
+            assessment,
+            result: closed ? state.kpiAssessment.find((row) => row.assessment_id === assessment.id && row.user_id === userId) ?? null : null,
+            feedback: closed ? state.feedback.filter((entry) => {
+              if (!entry.released) return false;
+              const submission = state.submissions.find((row) => row.id === entry.submission_id);
+              return submission?.assessment_id === assessment.id && submission.user_id === userId;
+            }) : [],
+            results: rows,
+            total: closed ? assessmentTotals(rows)[0] ?? null : null,
+          };
+        });
     },
     async teacherClasses(userId) {
       if (empty) return [];
@@ -642,6 +706,17 @@ export function createMockSource(options: MockOptions = {}): DataSource {
     },
     async publishAssessment(assessmentId) {
       return published('ASSESSMENT', assessmentId);
+    },
+    async teacherAssessmentResults(assessmentId): Promise<TeacherAssessmentResults> {
+      if (empty) return { rows: [], totals: [], kpi: [], profiles: [] };
+      const rows = assessmentRows(assessmentId, null, true);
+      const userIds = [...new Set(rows.map((row) => row.user_id))];
+      return {
+        rows,
+        totals: assessmentTotals(rows),
+        kpi: state.kpiAssessment.filter((row) => row.assessment_id === assessmentId),
+        profiles: state.profiles.filter((row) => userIds.includes(row.id)),
+      };
     },
     async adminDepartments() {
       return empty ? [] : state.departments;

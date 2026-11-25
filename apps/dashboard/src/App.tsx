@@ -22,6 +22,7 @@ import { TeacherCourseEditor } from './screens/teacher/TeacherCourseEditor';
 import { TeacherQuestionEditor } from './screens/teacher/TeacherQuestionEditor';
 import { TeacherAssessments } from './screens/teacher/TeacherAssessments';
 import { TeacherAssessmentEditor } from './screens/teacher/TeacherAssessmentEditor';
+import { TeacherAssessmentResults } from './screens/teacher/TeacherAssessmentResults';
 import { AdminOverview } from './screens/admin/AdminOverview';
 import { AdminDepartments } from './screens/admin/AdminDepartments';
 import { AdminClasses } from './screens/admin/AdminClasses';
@@ -77,6 +78,7 @@ function App() {
             <Route path="courses/:courseId/questions/:questionId" element={<TeacherQuestionEditor />} />
             <Route path="assessments" element={<TeacherAssessments />} />
             <Route path="assessments/:assessmentId" element={<TeacherAssessmentEditor />} />
+            <Route path="assessments/:assessmentId/results" element={<TeacherAssessmentResults />} />
           </Route>
         ) : null}
         {profile.role === 'COLLEGE_ADMIN' ? (

@@ -24,6 +24,9 @@ Supabase owns operational identities, course content, submissions and KPI servin
 - `kpi_student_topic`: organization_id, user_id, topic, attempted, solved, mastery, computed_at.
 - `kpi_assessment`: organization_id, assessment_id, user_id, score, solved, total_questions, time_minutes, flags, computed_at.
 - `kpi_class_daily` view: class_id, day, active_students, avg_active_minutes, solve_rate.
+- `assessment_results` view (ADDED BY PHASE 10): one row per user, assessment, question and best attempt; final verdict uses `recheck_verdict` when `high_stakes` and the re-check is `DONE`, else `verdict`; includes `late_status`, `recheck_status`, `attempts_used`, `question_points`, `points_earned` (late counts 0 unless `feedback.score_override`) and `score_override`.
+- `assessment_user_results` view (ADDED BY PHASE 10): per user and assessment totals (`questions`, `solved`, `score`, `pending_rechecks`, `max_attempts_used`).
+- `claim_recheck()` (ADDED BY PHASE 10): `security definer`, executable by `service_role` only; claims one `QUEUED` re-check with `FOR UPDATE SKIP LOCKED` and moves it to `RUNNING`.
 
 ## RLS policy matrix
 
@@ -66,6 +69,9 @@ supabase functions deploy activity-upload-url
 supabase functions deploy pack-download-url
 supabase functions deploy publish-pack
 supabase functions deploy invite-user
+supabase functions deploy register-device
+supabase functions deploy assessment-key
+supabase functions deploy submit-assessment-attempts
 ```
 
 Function secrets are `OCI_TENANCY`, `OCI_USER`, `OCI_FINGERPRINT`, `OCI_PRIVATE_KEY`, `OCI_REGION`, `OCI_NAMESPACE`, `OCI_BUCKET`, `PACK_SIGNING_KEY`, and the Supabase runtime's `SUPABASE_SERVICE_ROLE_KEY`. Supabase supplies `SUPABASE_URL` and `SUPABASE_ANON_KEY`. Configure the origin allowlist, including the dashboard and Tauri origins:
@@ -74,6 +80,8 @@ Function secrets are `OCI_TENANCY`, `OCI_USER`, `OCI_FINGERPRINT`, `OCI_PRIVATE_
 supabase secrets set OCI_TENANCY="<tenancy-ocid>" OCI_USER="<user-ocid>" OCI_FINGERPRINT="<fingerprint>" OCI_PRIVATE_KEY="<pem-private-key>" OCI_REGION="<region>" OCI_NAMESPACE="<namespace>" OCI_BUCKET="<bucket>" PACK_SIGNING_KEY="<base64-ed25519-seed>" ALLOWED_ORIGINS="https://<dashboard-domain>,tauri://localhost,http://tauri.localhost"
 ```
 
-Never put these values in a client build. Create the language-pack PAR once in the OCI console for only `packs/lang/`, with read-only access and an owner-managed expiry; set its Object Storage URL as the desktop `VITE_LANG_PACKS_BASE_URL`. The functions do not create that prefix PAR. Keep the bucket private, turn versioning off, and configure a lifecycle policy deleting `raw/activity/` objects after 365 days. Course packs live at `packs/course/{courseId}/{version}.lpack`; the broker returns separate 15-minute read PARs for the pack and detached signature. Activity uploads use a single-object 15-minute write PAR under `raw/activity/`.
+Never put these values in a client build. Create the language-pack PAR once in the OCI console for only `packs/lang/`, with read-only access and an owner-managed expiry; set its Object Storage URL as the desktop `VITE_LANG_PACKS_BASE_URL`. The functions do not create that prefix PAR. Keep the bucket private, turn versioning off, and configure a lifecycle policy deleting `raw/activity/` objects after 365 days. Course packs live at `packs/course/{courseId}/{version}.lpack`; assessment packs live at `packs/assessment/{assessmentId}/{version}.lpack` with hidden tests only in the encrypted `.hidden.enc` entries. The broker returns separate 15-minute read PARs for the pack and detached signature. Activity uploads use a single-object 15-minute write PAR under `raw/activity/`.
+
+`publish-pack` with `{ assessmentId }` (ADDED BY PHASE 10) requires a `DRAFT`/`SCHEDULED` assessment with a future `opensAt`, generates the 32-byte assessment key once (republishing before the open keeps it), and rejects with `409 ASSESSMENT_STARTED` after the window opens. The re-check worker (`pnpm --filter @lplatform/api recheck:worker`) claims jobs through `claim_recheck()` and needs `JUDGE_PROVIDER=judge0`, `JUDGE0_URL`, `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`; it only marks a submission `ACCEPTED` from a real Judge0 result.
 
 Before release, deploy to staging and verify an ObjectWrite PAR uploads a 1 KB gzip only to its scoped activity object, a read PAR downloads a published pack and signature, and both URLs expire. The OCI PAR round trip remains **Blocked** until the owner provides OCI credentials and a staging bucket.

@@ -34,6 +34,7 @@ const ROUTES: Record<Role, Array<{ path: string; expect: RegExp }>> = {
     { path: `/teacher/courses/${COURSE}/questions/${QUESTION}`, expect: /Two Sum/ },
     { path: '/teacher/assessments', expect: /^Assessments/ },
     { path: `/teacher/assessments/${ASSESSMENT}`, expect: /Mid-semester assessment/ },
+    { path: `/teacher/assessments/${ASSESSMENT}/results`, expect: /Mid-semester assessment results/ },
   ],
   COLLEGE_ADMIN: [
     { path: '/admin', expect: /Organization overview/ },

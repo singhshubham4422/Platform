@@ -252,10 +252,46 @@ export interface SubmissionDetail {
   results: TestResultRow[];
 }
 
+export interface AssessmentResultRow {
+  user_id: string;
+  assessment_id: string;
+  question_id: string;
+  best_attempt_id: string;
+  final_verdict: Verdict | null;
+  late_status: LateStatus | null;
+  recheck_status: RecheckStatus;
+  passed: number | null;
+  total: number | null;
+  attempts_used: number;
+  question_points: number;
+  points_earned: number;
+  score_override: number | null;
+  best_received_at: string;
+}
+
+export interface AssessmentUserResult {
+  user_id: string;
+  assessment_id: string;
+  questions: number;
+  solved: number;
+  score: number;
+  pending_rechecks: number;
+  max_attempts_used: number;
+}
+
+export interface TeacherAssessmentResults {
+  rows: AssessmentResultRow[];
+  totals: AssessmentUserResult[];
+  kpi: KpiAssessment[];
+  profiles: Profile[];
+}
+
 export interface StudentAssessmentResult {
   assessment: Assessment;
   result: KpiAssessment | null;
   feedback: Feedback[];
+  results: AssessmentResultRow[];
+  total: AssessmentUserResult | null;
 }
 
 export interface OrgOverviewPoint {

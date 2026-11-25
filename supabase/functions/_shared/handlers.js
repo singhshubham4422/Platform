@@ -1,6 +1,7 @@
 import { authenticated, requireHash, requireUuid, envOrThrow, uuid } from './http.js';
-import { badRequest, forbidden, notFound, conflict, tooLarge, notImplemented } from './errors.js';
+import { badRequest, forbidden, notFound, conflict, tooLarge } from './errors.js';
 import { createOci } from './oci.js';
+import { publishAssessment } from './assessments.js';
 
 const nowIso = () => new Date().toISOString();
 const failDb = (e) => { if (e) throw new Error('DATABASE_OPERATION_FAILED'); };
@@ -35,9 +36,9 @@ export async function packDownloadUrl({ request, body, env, createClient, oci = 
   return { url, sigUrl:signatureUrl, sha256:row.data.sha256, size:row.data.size, expiresAt };
 }
 
-export async function publishPack({ request, body, env, createClient, oci = createOci({ env }), packFormat }) {
+export async function publishPack({ request, body, env, createClient, oci = createOci({ env }), packFormat, now }) {
+  if (body?.assessmentId) return publishAssessment({ request, body, env, createClient, oci, packFormat, now });
   const { userClient, serviceClient, user } = await authenticated({ request, env, createClient });
-  if (body?.assessmentId) { throw notImplemented('ASSESSMENT_PUBLISH_IN_PHASE_10', 'Assessment publishing is implemented in phase 10'); /* TODO(offline-integration): phase 10 assessment publishing */ }
   const courseId = requireUuid(body?.courseId, 'courseId');
   const permission = await userClient.rpc('rls_can_manage_course', { cid: courseId });
   if (permission.error) throw new Error('DATABASE_OPERATION_FAILED');

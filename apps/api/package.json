@@ -25,6 +25,7 @@
     "db:seed": "tsx src/db/seed.ts",
     "judge:worker": "tsx src/modules/judge/worker.ts",
     "judge:worker:start": "node dist/modules/judge/worker.js",
+    "recheck:worker": "tsx src/modules/judge/recheck-worker.ts",
     "db:bootstrap": "tsx src/db/bootstrap.ts",
     "db:bootstrap:prod": "node dist/db/bootstrap.js",
     "db:migrate:prod": "node dist/db/migrate.js"
