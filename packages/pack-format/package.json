@@ -18,6 +18,6 @@
     "lint": "node --check index.js && node --check bin/pack-builder.mjs && node --check test/pack-format.test.mjs"
   },
   "dependencies": {
-    "fflate": "0.8.2"
+    "fflate": "0.8.3"
   }
 }

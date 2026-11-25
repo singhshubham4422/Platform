@@ -3,7 +3,7 @@
 //   EMAIL_PROVIDER=dev-outbox  stores messages in email_outbox for local development and automated tests.
 //                              Refuses to run in production because the body contains the OTP.
 // Message bodies (and OTP codes) are never written to logs.
-import nodemailer from 'nodemailer';
+import nodemailer, { type Transporter } from 'nodemailer';
 import type { Tx } from '../../lib/scoped-sql.js';
 
 export interface OutgoingEmail {
@@ -23,8 +23,8 @@ export function emailProvider(): 'smtp' | 'dev-outbox' | 'none' {
   return 'none';
 }
 
-let transport: nodemailer.Transporter | null = null;
-function smtp(): nodemailer.Transporter {
+let transport: Transporter | null = null;
+function smtp(): Transporter {
   transport ??= nodemailer.createTransport({
     host: process.env.SMTP_HOST,
     port: Number(process.env.SMTP_PORT || 587),
