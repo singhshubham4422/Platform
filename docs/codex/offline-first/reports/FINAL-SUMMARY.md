@@ -59,10 +59,15 @@ Branches: `main` = `offline-first`, pushed to https://github.com/singhshubham442
 | Language packs | Python 3.12.10, Java 21.0.13.1 (jlink), C and C++ (GCC 16.2.0, static linking), signed with `.local/keys/release.seed`; index signed | Signature and hash verified, validator passed, smoke-tested locally |
 | Dashboard | https://lplatform-dashboard.vercel.app (Vercel, static) | Loaded in the browser; sign-in page renders |
 
+### Live end-to-end test (2026-11-25)
+35 checks passed against the live services, using real e-mailed codes (Brevo): owner sign-in and invites; student sign-in, catalog, signed course-pack and Java-pack download and verification; the solution compiled with the downloaded JDK and passed the visible and hidden tests; device registration; signed, idempotent submission (pinned to the student); activity batch upload to Oracle (oversized batch refused); RLS (no hidden tests or keys for students; own profile and submissions only; no delete); teacher sees the class student's submission and releases feedback, and the student receives it.
+The run found and fixed two production bugs: every Object Storage link request returned 500 (OCI console key format), and teacher access was course-based instead of class-based (it could expose other colleges' submissions). Auth email limit raised from 2 to 100 per hour and code expiry set to 10 minutes. All TEST accounts, the TEST college and its uploaded activity were deleted afterwards.
+The desktop GUI itself was not driven; the test followed the same API calls as its sync code.
+
 ### Still open
 - **Desktop release build** must be compiled with `LPLATFORM_RELEASE_PUBKEY` and `LPLATFORM_PACK_PUBKEY` set to the contents of `.local/keys/release.pub` and `pack.pub`, and `.env` values for `VITE_*`; otherwise installs fail with `PACK_KEY_NOT_CONFIGURED`.
 - **Signing keys:** the release and pack keys in `.local/keys` were generated as development keys but are now the live keys. Keep `.local/` backed up and private; losing them means re-signing every pack.
-- **Not yet run end to end:** a real student OTP sign-in → install language → solve → sync → KPI cycle, and an assessment journey. No student or college accounts exist yet (only the platform owner).
+- **Not yet run end to end:** the desktop GUI itself, the KPI cycle (needs ATP), and an assessment journey. No real student or college accounts exist yet (only the platform owner).
 - **ATP KPI pipeline** is not set up in Oracle (schemas `LPKPI`/`LPKPI_VERIFY`, credential, scheduler).
 - **Judge0 re-check** still needs an x86 Linux PC.
 - **A1 retry task** `LPlatform-OCI-A1-Retry` is disabled; its last log line is from 2026-11-24 17:11 and shows no success.
