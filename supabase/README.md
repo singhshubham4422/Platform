@@ -62,7 +62,7 @@ Run `pnpm test:supabase` to create a fresh local database, apply the auth stub a
 
 ## Broker
 
-Deploy each function from this repository with `supabase functions deploy <name>`:
+Deploy each function from this repository with `supabase functions deploy <name> --project-ref <ref> --use-api --import-map supabase/functions/deno.json`. The import map is required: without it the bundler rejects the bare `@supabase/supabase-js` and `fflate` imports. `--use-api` bundles on Supabase's side, so Docker is not needed:
 
 ```powershell
 supabase functions deploy activity-upload-url

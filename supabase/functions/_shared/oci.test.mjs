@@ -19,3 +19,17 @@ test('OCI RSA request signature covers exact basic and JSON header sets', async 
     assert.equal(result.signingString,expected);
   }
 });
+
+test('OCI console keys with a trailing "OCI_API_KEY" line (and escaped \n secrets) still sign', async () => {
+  const pair = await crypto.subtle.generateKey({ name:'RSASSA-PKCS1-v1_5', modulusLength:2048, publicExponent:new Uint8Array([1,0,1]), hash:'SHA-256' }, true, ['sign','verify']);
+  const body = Buffer.from(new Uint8Array(await crypto.subtle.exportKey('pkcs8', pair.privateKey))).toString('base64').match(/.{1,64}/g).join('\n');
+  const consoleKey = `-----BEGIN PRIVATE KEY-----\n${body}\n-----END PRIVATE KEY-----\nOCI_API_KEY\n`;
+  for (const pem of [consoleKey, consoleKey.replace(/\n/g, '\n')]) {
+    const url = new URL('https://objectstorage.test.oraclecloud.com/n/ns/b/bucket/p/');
+    const headers = { date:'Tue, 24 Nov 2026 00:00:00 GMT', host:url.host };
+    const r = await signRequest({ method:'GET', url, headers, keyId:'t/u/f', privateKeyPem:pem, signingHeaders:OCI_SIGNING_HEADERS.basic });
+    const sig = r.headers.authorization.match(/signature="([^"]+)"/)[1];
+    assert.equal(await crypto.subtle.verify('RSASSA-PKCS1-v1_5', pair.publicKey, Buffer.from(sig,'base64'), new TextEncoder().encode(r.signingString)), true);
+  }
+  await assert.rejects(signRequest({ method:'GET', url:new URL('https://x.test/'), headers:{date:'d',host:'x.test'}, keyId:'k', privateKeyPem:'not a key', signingHeaders:OCI_SIGNING_HEADERS.basic }), /OCI_PRIVATE_KEY_INVALID/);
+});

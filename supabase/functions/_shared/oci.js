@@ -4,7 +4,11 @@ const enc=new TextEncoder();
 const b64=(bytes)=>{let s='';for(const x of bytes)s+=String.fromCharCode(x);return btoa(s)};
 function pemBytes(pem){
   const normalized=pem.replace(/\\n/g,'\n');const pkcs1=/-----BEGIN RSA PRIVATE KEY-----/.test(normalized);
-  const raw=normalized.replace(/-----BEGIN (?:RSA )?PRIVATE KEY-----|-----END (?:RSA )?PRIVATE KEY-----|\s/g,'');
+  // Decode only the body between the markers: keys downloaded from the OCI console carry an
+  // extra "OCI_API_KEY" line after the END marker, which is not base64.
+  const block=/-----BEGIN (?:RSA )?PRIVATE KEY-----([\s\S]*?)-----END (?:RSA )?PRIVATE KEY-----/.exec(normalized);
+  if(!block)throw new Error('OCI_PRIVATE_KEY_INVALID');
+  const raw=block[1].replace(/\s/g,'');
   const key=Uint8Array.from(atob(raw),c=>c.charCodeAt(0));if(!pkcs1)return key;
   const len=(n)=>n<128?Uint8Array.of(n):Uint8Array.of(0x80+Math.ceil(Math.log2(n+1)/8),...Array.from({length:Math.ceil(Math.log2(n+1)/8)},(_,i)=>(n>>>(8*(Math.ceil(Math.log2(n+1)/8)-i-1)))&255));
   const octet=Uint8Array.of(4,...len(key.length),...key);const alg=Uint8Array.from([0x30,0x0d,0x06,0x09,0x2a,0x86,0x48,0x86,0xf7,0x0d,0x01,0x01,0x01,0x05,0x00]);const body=Uint8Array.from([0x02,0x01,0x00,...alg,...octet]);return Uint8Array.from([0x30,...len(body.length),...body]);
