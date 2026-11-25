@@ -231,7 +231,6 @@ pub fn park(conn: &Connection, id: &str, error: &str) -> rusqlite::Result<usize>
     )
 }
 
-#[allow(dead_code)] // used by the phase 10 assessment module
 pub fn count_submits(
     conn: &Connection,
     assessment_id: &str,

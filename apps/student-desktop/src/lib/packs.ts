@@ -23,6 +23,15 @@ export async function installPackFromBroker(packId: string): Promise<PackInfo> {
   const d = await getPackDownloadUrl(packId);
   return packsInstallFromUrl(d.url, d.sigUrl, d.sha256);
 }
+export interface AssessmentStatus { hasKey: boolean; startedAtMs: number | null; endsAtMs: number | null }
+export async function assessmentStoreKey(assessmentId: string, keyId: string, keyB64: string) {
+  desktop();
+  return invoke<void>('assessment_store_key', { assessmentId, keyId, keyB64 });
+}
+export async function assessmentStatus(packId: string) {
+  desktop();
+  return invoke<AssessmentStatus>('assessment_status', { packId });
+}
 /** Published courses with their newest pack, marked installed / update available / not installed. */
 export async function listCatalog() {
   const { fetchCatalog } = await import('./catalog');

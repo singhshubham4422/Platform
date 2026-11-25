@@ -1,6 +1,6 @@
 use super::{PackInfo, PackManager, QuestionSummary, QuestionView, VisibleTest, read};
 use crate::{
-    attempts,
+    assessment, attempts,
     runner::{self, Mode, RunResult, RunSpec, TestCase},
     runtimes::{self, RuntimeManager},
     secrets::SecretStore,
@@ -125,10 +125,26 @@ pub fn run_question(
     };
     let (row, d) = verified(store, id)?;
     let m = &d.manifest;
-    if row.kind == "ASSESSMENT" && mode == Mode::Submit {
-        // TODO(offline-integration): phase 10 decrypt
-        return Err("ASSESSMENT_LOCKED: phase 10".into());
-    }
+    // Phase 10: assessment packs need the key (fetched online at Start), an open local window,
+    // remaining time and, for SUBMIT, remaining attempts. The server re-checks all of it.
+    let assessment = if row.kind == "ASSESSMENT" {
+        let info = assessment::info(m)?;
+        let aid = row
+            .assessment_id
+            .clone()
+            .ok_or("INVALID_MANIFEST: assessmentId")?;
+        let c = store
+            .0
+            .lock()
+            .map_err(|_| "IO: local database lock poisoned".to_string())?;
+        assessment::check_can_run(&c, secrets, &aid, &info, assessment::now_ms())?;
+        if mode == Mode::Submit {
+            assessment::check_attempts(&c, &aid, qid, &info)?;
+        }
+        Some((aid, info))
+    } else {
+        None
+    };
     let langs = m["languages"].as_array().ok_or("INVALID_MANIFEST")?;
     if !langs.iter().any(|l| l.as_str() == Some(language)) {
         return Err("IO: language not offered".into());
@@ -155,16 +171,22 @@ pub fn run_question(
         let hpath = qmeta["hiddenTestsPath"]
             .as_str()
             .ok_or("INVALID_MANIFEST")?;
-        if !hpath.ends_with(".hidden.json") {
-            return Err("ASSESSMENT_LOCKED: phase 10".into());
-        }
-        let hidden: serde_json::Value =
-            serde_json::from_slice(d.files.get(hpath).ok_or("UNSAFE_ARCHIVE")?)
-                .map_err(|_| "INVALID_MANIFEST")?;
-        for t in hidden["tests"].as_array().into_iter().flatten() {
-            let mut c = test_case(t)?;
-            c.hidden = true;
-            tests.push(c)
+        let bytes = d.files.get(hpath).ok_or("UNSAFE_ARCHIVE")?;
+        match (&assessment, hpath.ends_with(".hidden.enc")) {
+            (Some((aid, info)), true) => {
+                tests.extend(assessment::hidden_tests(bytes, secrets, aid, info)?);
+            }
+            (None, false) if hpath.ends_with(".hidden.json") => {
+                let hidden: serde_json::Value =
+                    serde_json::from_slice(bytes).map_err(|_| "INVALID_MANIFEST")?;
+                for t in hidden["tests"].as_array().into_iter().flatten() {
+                    let mut c = test_case(t)?;
+                    c.hidden = true;
+                    tests.push(c)
+                }
+            }
+            // Assessment packs must be encrypted; practice packs must not be.
+            _ => return Err("INVALID_MANIFEST: hidden tests".into()),
         }
     }
     let runtime = runtimes::resolve(store, rt_mgr, language)?;

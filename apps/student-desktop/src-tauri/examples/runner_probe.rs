@@ -20,6 +20,7 @@ fn main() {
             for i in (0..v.len()).step_by(4096) {
                 v[i] = 1;
             }
+            std::hint::black_box(&v);
             thread::sleep(Duration::from_secs(3));
         }
         Some("flood") => {

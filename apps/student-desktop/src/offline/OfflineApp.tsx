@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { BookOpen, LogOut } from 'lucide-react';
+import { BookOpen, ClipboardCheck, LogOut } from 'lucide-react';
 import { SupabaseLogin } from '../components/SupabaseLogin';
 import { SyncStatus } from '../components/SyncStatus';
+import { AssessmentView } from '../platform/AssessmentView';
 import { PlatformHome } from '../platform/PlatformHome';
 import { getSupabase, loadProfile, type StudentProfile } from '../lib/supabase-client';
 import { flushActivity, queueActivity, setActivityIdentity } from '../lib/activity-queue';
@@ -11,7 +12,7 @@ import { getCursor, setCursor } from '../lib/offline-store';
 
 const PROFILE_CURSOR = 'profile:v1';
 
-type Section = 'platform';
+type Section = 'platform' | 'assessments';
 
 const APP_VERSION = '0.5.0';
 
@@ -127,6 +128,9 @@ export const OfflineApp: React.FC = () => {
           <button className={`btn ${section === 'platform' ? 'btn-primary' : ''}`} aria-current={section === 'platform' ? 'page' : undefined} onClick={() => setSection('platform')}>
             <BookOpen size={15} /> Platform
           </button>
+          <button className={`btn ${section === 'assessments' ? 'btn-primary' : ''}`} aria-current={section === 'assessments' ? 'page' : undefined} onClick={() => setSection('assessments')}>
+            <ClipboardCheck size={15} /> Assessments
+          </button>
         </nav>
         <div style={{ marginTop: 'auto' }}>
           <SyncStatus engine={getOfflineSync()} />
@@ -135,7 +139,10 @@ export const OfflineApp: React.FC = () => {
           </button>
         </div>
       </aside>
-      <main className="hr-main">{section === 'platform' && <PlatformHome />}</main>
+      <main className="hr-main">
+        {section === 'platform' && <PlatformHome />}
+        {section === 'assessments' && <AssessmentView />}
+      </main>
     </div>
   );
 };

@@ -11,7 +11,6 @@ use std::sync::Mutex;
 
 pub const DEVICE_KEY: &str = "lplatform/device-key";
 
-#[allow(dead_code)] // used by the phase 10 assessment module
 pub fn assessment_key_name(assessment_id: &str) -> String {
     format!("lplatform/assessment/{assessment_id}")
 }

@@ -1,4 +1,5 @@
 mod activity;
+mod assessment;
 mod attempts;
 mod device;
 mod packs;
@@ -253,7 +254,9 @@ pub fn run() {
             activity_seal_batch,
             activity_ack_batch,
             activity_counts,
-            device_info
+            device_info,
+            assessment_store_key,
+            assessment_status
         ])
         .run(tauri::generate_context!())
         .expect("error while building tauri application");
@@ -465,6 +468,41 @@ fn device_info(
 ) -> CmdResult<device::DeviceInfo> {
     let c = lock_store(&state)?;
     device::ensure(&c, secrets.0.as_ref())
+}
+
+#[tauri::command]
+fn assessment_store_key(
+    assessment_id: String,
+    key_id: String,
+    key_b64: String,
+    state: State<'_, Store>,
+    secrets: State<'_, secrets::Secrets>,
+) -> CmdResult<()> {
+    let c = lock_store(&state)?;
+    assessment::store_key(
+        &c,
+        secrets.0.as_ref(),
+        &assessment_id,
+        &key_id,
+        &key_b64,
+        assessment::now_ms(),
+    )
+}
+#[tauri::command]
+fn assessment_status(
+    pack_id: String,
+    state: State<'_, Store>,
+    secrets: State<'_, secrets::Secrets>,
+) -> CmdResult<assessment::AssessmentStatus> {
+    let c = lock_store(&state)?;
+    let row = store::packs_get(&c, &pack_id)
+        .map_err(|e| format!("IO: {e}"))?
+        .ok_or_else(|| format!("PACK_NOT_FOUND: {pack_id}"))?;
+    let manifest: serde_json::Value =
+        serde_json::from_str(&row.manifest_json).map_err(|_| "INVALID_MANIFEST".to_string())?;
+    let info = assessment::info(&manifest)?;
+    let aid = row.assessment_id.ok_or("INVALID_MANIFEST: assessmentId")?;
+    assessment::status(&c, secrets.0.as_ref(), &aid, &info)
 }
 
 #[cfg(target_os = "windows")]

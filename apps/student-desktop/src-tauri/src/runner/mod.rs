@@ -147,6 +147,9 @@ struct Output {
     timed: bool,
     overflow: bool,
     elapsed: u64,
+    peak_kb: u64,
+    memory_limit_hit: bool,
+    cpu_limit_hit: bool,
 }
 #[allow(clippy::too_many_arguments)]
 fn execute(
@@ -202,8 +205,17 @@ fn execute(
     let err_thread =
         thread::spawn(move || read_capped(err, 16 * 1024, Arc::new(AtomicBool::new(false))));
     let mut timed = false;
+    let mut cpu_polled_hit = false;
+    let cpu_limit_ms = cpu_time.as_millis() as u64;
     let status = loop {
         if overflow.load(Ordering::Relaxed) {
+            kill_tree(&mut child);
+            break child.wait().ok();
+        }
+        #[cfg(windows)]
+        if job.cpu_ms() >= cpu_limit_ms {
+            cpu_polled_hit = true;
+            job.kill_all();
             kill_tree(&mut child);
             break child.wait().ok();
         }
@@ -214,24 +226,51 @@ fn execute(
             Some(s) => break Some(s),
             None if start.elapsed() >= timeout => {
                 timed = true;
+                #[cfg(windows)]
+                job.kill_all();
                 kill_tree(&mut child);
                 break child.wait().ok();
             }
             None => {}
         }
     };
+    let elapsed = start.elapsed().as_millis() as u64;
+    // Read the job's accounting, then end any processes the program left behind BEFORE joining
+    // the pipe readers: a surviving child holding stdout would otherwise block the reads.
+    #[cfg(windows)]
+    let stats = {
+        let s = job.stats();
+        job.kill_all();
+        s
+    };
+    #[cfg(not(windows))]
+    let stats = (0u64, false, false);
     let _ = writer.join();
     let out = out_thread.join().unwrap_or_default();
     let err = err_thread.join().unwrap_or_default();
     #[cfg(windows)]
     drop(job);
+    #[cfg(windows)]
+    let (peak_kb, memory_limit_hit, cpu_limit_hit) = (
+        stats.peak_kb,
+        stats.memory_limit_hit,
+        cpu_polled_hit || stats.cpu_limit_hit || stats.cpu_ms >= cpu_limit_ms,
+    );
+    #[cfg(not(windows))]
+    let (peak_kb, memory_limit_hit, cpu_limit_hit) = {
+        let _ = (cpu_polled_hit, cpu_limit_ms);
+        stats
+    };
     Ok(Output {
         out,
         err,
         code: status.and_then(|s| s.code()),
         timed,
         overflow: overflow.load(Ordering::Relaxed),
-        elapsed: start.elapsed().as_millis() as u64,
+        elapsed,
+        peak_kb,
+        memory_limit_hit,
+        cpu_limit_hit,
     })
 }
 #[cfg(unix)]
@@ -396,9 +435,13 @@ fn run_tests_inner(spec: &RunSpec, rt: &ResolvedRuntime, work_root: &Path) -> Ru
                 let err = clean(&o.err, &root);
                 let v = if o.overflow {
                     "OUTPUT_LIMIT_EXCEEDED"
-                } else if o.timed {
+                } else if o.memory_limit_hit && (o.code != Some(0) || o.timed) {
+                    "MEMORY_LIMIT_EXCEEDED"
+                } else if o.timed || o.cpu_limit_hit {
                     "TIME_LIMIT_EXCEEDED"
-                } else if spec.language == "JAVA" && err.contains("OutOfMemoryError") {
+                } else if o.code != Some(0)
+                    && (spec.language == "JAVA" && err.contains("OutOfMemoryError"))
+                {
                     "MEMORY_LIMIT_EXCEEDED"
                 } else if o.code != Some(0) {
                     "RUNTIME_ERROR"
@@ -411,7 +454,7 @@ fn run_tests_inner(spec: &RunSpec, rt: &ResolvedRuntime, work_root: &Path) -> Ru
                 } else {
                     "WRONG_ANSWER"
                 };
-                (v, out, err, o.elapsed, 0)
+                (v, out, err, o.elapsed, o.peak_kb)
             }
             Err(e) => ("RUNTIME_ERROR", String::new(), e, 0, 0),
         };
