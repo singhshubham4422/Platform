@@ -13,8 +13,16 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 24
-      - run: npm install --prefix "$RUNNER_TEMP/lp-atp-driver" --ignore-scripts --no-save oracledb@6.10.0
-      - run: node oracle/atp/keepalive.mjs
+      - name: Check ATP secrets
+        id: cfg
+        env:
+          ATP_USER: ${{ secrets.ATP_USER }}
+        run: |
+          if [ -z "$ATP_USER" ]; then echo "ATP secrets are not configured yet; skipping the keep-alive."; echo "skip=true" >> "$GITHUB_OUTPUT"; fi
+      - if: steps.cfg.outputs.skip != 'true'
+        run: npm install --prefix "$RUNNER_TEMP/lp-atp-driver" --ignore-scripts --no-save oracledb@6.10.0
+      - if: steps.cfg.outputs.skip != 'true'
+        run: node oracle/atp/keepalive.mjs
         env:
           ATP_USER: ${{ secrets.ATP_USER }}
           ATP_PASSWORD: ${{ secrets.ATP_PASSWORD }}
