@@ -1,0 +1,2 @@
+{"eventId":"00000000-0000-4000-8000-000000000061","seq":2,"eventType":"code_changed","clientTs":"2026-11-24T08:00:20.000Z","userId":"00000000-0000-4000-8000-000000000013","organizationId":"00000000-0000-4000-8000-000000000021","metadata":{"insertedChars":999}}
+{"eventId":"00000000-0000-4000-8000-000000000061","seq":1,"eventType":"code_changed","clientTs":"2026-11-24T08:00:10.000Z","userId":"00000000-0000-4000-8000-000000000013","organizationId":"00000000-0000-4000-8000-000000000021","metadata":{"insertedChars":9}}

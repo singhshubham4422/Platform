@@ -1,0 +1,1 @@
+{"name":"@lplatform/oracle-atp","version":"1.0.0","private":true,"type":"module","scripts":{"verify":"node verify.mjs","keepalive":"node keepalive.mjs"},"dependencies":{"oracledb":"=6.10.0"}}

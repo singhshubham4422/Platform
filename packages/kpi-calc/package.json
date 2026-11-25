@@ -1,0 +1,1 @@
+{"name":"@lplatform/kpi-calc","version":"1.0.0","private":true,"type":"module","types":"./index.d.ts","exports":"./index.js","scripts":{"test":"node --test test/*.test.mjs"}}

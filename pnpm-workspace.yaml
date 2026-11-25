@@ -1,6 +1,7 @@
 packages:
   - apps/*
   - packages/*
+  - oracle/atp
 
 allowBuilds:
   argon2: true
@@ -8,6 +9,7 @@ allowBuilds:
   sharp: true
   '@tailwindcss/oxide': true
   unrs-resolver: true
+  oracledb: false
 
 overrides:
   '@esbuild-kit/core-utils>esbuild': '>=0.25.0'

@@ -1,0 +1,7 @@
+{
+  "daily":[{"organization_id":"00000000-0000-4000-8000-000000000021","user_id":"00000000-0000-4000-8000-000000000011","day":"2026-11-24","active_minutes":4,"questions_attempted":1,"questions_solved":1,"runs":1,"submits":2,"accepted_submits":1,"typed_chars":200,"paste_chars":0,"paste_ratio":0,"focus_lost_count":0,"idle_minutes":0,"computed_at":"2026-11-24T00:00:00.000Z"}],
+  "topics":{"rows":[
+    {"organization_id":"00000000-0000-4000-8000-000000000021","user_id":"00000000-0000-4000-8000-000000000011","topic":"arrays","attempted":1,"solved":1,"mastery":67,"computed_at":"2026-11-24T00:00:00.000Z"},
+    {"organization_id":"00000000-0000-4000-8000-000000000021","user_id":"00000000-0000-4000-8000-000000000011","topic":"basics","attempted":1,"solved":1,"mastery":67,"computed_at":"2026-11-24T00:00:00.000Z"}
+  ],"skippedQuestions":0}
+}
