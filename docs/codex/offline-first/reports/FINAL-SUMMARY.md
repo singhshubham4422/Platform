@@ -1,6 +1,6 @@
 # Offline-First Implementation — Final Summary
 
-Branch: `offline-first` (local only, unpushed).
+Branches: `main` = `offline-first`, pushed to https://github.com/singhshubham4422/Platform (public).
 
 ## Phase Status
 
@@ -43,6 +43,30 @@ Branch: `offline-first` (local only, unpushed).
 - On Windows, the student process is assigned to its Job Object immediately after `Command::spawn` rather than created suspended (`CREATE_SUSPENDED`), leaving a microsecond window before limits attach.
 - Assessment question text (`questions/{id}.json`) is readable on disk before the start time; only `tests/{id}.hidden.enc` is encrypted.
 - There is no secure key storage implementation (`SecretStore`) on macOS/Linux, so attempts on those platforms are unsigned.
+
+## Live environment (verified 2026-11-25)
+
+| Part | State | How it was checked |
+| --- | --- | --- |
+| GitHub | `main`, `offline-first`, `release/rc1` pushed; CI runs on push | `gh repo view`, `gh run list` |
+| Supabase project | Org "Platform", project ref `tnvnrwnmkusttmzcoypb` (Tokyo, free) | Dashboard |
+| Database schema | Matches migrations 0001–0006 exactly (tables, forced RLS, policies, columns, function bodies, constraints); history recorded in `supabase_migrations.schema_migrations` | Schema diff against a local build of the migrations |
+| Auth | Email OTP; sign-ups, anonymous sign-ins and manual linking off; Brevo SMTP; OTP template now sends `{{ .Token }}` (it used to send only a link, which the apps cannot use) | Dashboard |
+| Edge Functions | All 7 deployed; secrets set; `ALLOWED_ORIGINS` = Vercel dashboard + Tauri + `localhost:1420` | Dashboard, live CORS preflight returned 204 |
+| `PACK_SIGNING_KEY` | Same key as `.local/keys/pack.seed` | SHA-256 digest comparison |
+| Practice content | "Java Practice (imported, unreviewed)": 240 questions, 479 visible / 248 hidden tests, PUBLISHED, pack `7b0f5d7e-2b8c-4e47-9d0a-6a2c4f1d9e01@1` uploaded and recorded | Management API query, object HEAD size match |
+| Oracle bucket `lplatform-files` | Private, 365-day delete rule on `raw/activity/`, read-only PAR on `packs/lang/` until 2027-11-25 | OCI CLI |
+| Language packs | Python 3.12.10, Java 21.0.13.1 (jlink), C and C++ (GCC 16.2.0, static linking), signed with `.local/keys/release.seed`; index signed | Signature and hash verified, validator passed, smoke-tested locally |
+| Dashboard | https://lplatform-dashboard.vercel.app (Vercel, static) | Loaded in the browser; sign-in page renders |
+
+### Still open
+- **Desktop release build** must be compiled with `LPLATFORM_RELEASE_PUBKEY` and `LPLATFORM_PACK_PUBKEY` set to the contents of `.local/keys/release.pub` and `pack.pub`, and `.env` values for `VITE_*`; otherwise installs fail with `PACK_KEY_NOT_CONFIGURED`.
+- **Signing keys:** the release and pack keys in `.local/keys` were generated as development keys but are now the live keys. Keep `.local/` backed up and private; losing them means re-signing every pack.
+- **Not yet run end to end:** a real student OTP sign-in → install language → solve → sync → KPI cycle, and an assessment journey. No student or college accounts exist yet (only the platform owner).
+- **ATP KPI pipeline** is not set up in Oracle (schemas `LPKPI`/`LPKPI_VERIFY`, credential, scheduler).
+- **Judge0 re-check** still needs an x86 Linux PC.
+- **A1 retry task** `LPlatform-OCI-A1-Retry` is disabled; its last log line is from 2026-11-24 17:11 and shows no success.
+- Python's embeddable zip was verified by HTTPS source and size only (python.org publishes Sigstore signatures, not checksums).
 
 ## Blocked on the Owner
 

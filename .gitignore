@@ -32,3 +32,6 @@ infra/local-development/storage-data/
 *.AppImage
 *.deb
 *.rpm
+
+# Supabase CLI local state
+supabase/.temp/
