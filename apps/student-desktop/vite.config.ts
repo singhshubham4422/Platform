@@ -28,6 +28,15 @@ export default defineConfig({
     },
   },
   test: {
+    // Tests must not depend on the developer's root .env (envDir above): pin the offline-first
+    // settings to "unset"; tests that need them stub them explicitly with vi.stubEnv.
+    env: {
+      VITE_OFFLINE_FIRST: '',
+      VITE_SUPABASE_URL: '',
+      VITE_SUPABASE_ANON_KEY: '',
+      VITE_FUNCTIONS_URL: '',
+      VITE_LANG_PACKS_BASE_URL: '',
+    },
     include: ['src/**/*.test.{ts,tsx}', 'tests/**/*.test.{ts,tsx}', 'tests/**/*.spec.{ts,tsx}'],
     exclude: ['tests/foundation.test.mjs', '**/node_modules/**', '**/dist/**'],
   },
