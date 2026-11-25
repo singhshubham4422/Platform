@@ -1,7 +1,9 @@
 use super::{PackInfo, PackManager, QuestionSummary, QuestionView, VisibleTest, read};
 use crate::{
+    attempts,
     runner::{self, Mode, RunResult, RunSpec, TestCase},
     runtimes::{self, RuntimeManager},
+    secrets::SecretStore,
     store::{self, Store},
 };
 use std::{fs, path::PathBuf};
@@ -109,6 +111,7 @@ pub fn run_question(
     store: &Store,
     pack_mgr: &PackManager,
     rt_mgr: &RuntimeManager,
+    secrets: &dyn SecretStore,
     id: &str,
     qid: &str,
     language: &str,
@@ -177,8 +180,43 @@ pub fn run_question(
         mode,
     };
     let root = pack_mgr.root.join("runner");
-    fs::create_dir_all(&root).map_err(|e| format!("IO: {e}"))?; // TODO(offline-integration): phase 05 persists attempt here
-    Ok(runner::run_tests(&spec, &runtime, &root))
+    fs::create_dir_all(&root).map_err(|e| format!("IO: {e}"))?;
+    let result = runner::run_tests(&spec, &runtime, &root);
+    persist(store, secrets, &row, qid, language, source, &result)?;
+    Ok(result)
+}
+
+/// Phase 05: every RUN/SUBMIT is stored and signed. A SUBMIT that cannot be stored is an error
+/// (the student must not believe it was saved); a RUN storage failure is only logged.
+fn persist(
+    store: &Store,
+    secrets: &dyn SecretStore,
+    row: &store::PackRow,
+    qid: &str,
+    language: &str,
+    source: &str,
+    result: &RunResult,
+) -> Result<(), String> {
+    let ctx = attempts::AttemptContext {
+        pack_id: &row.pack_id,
+        question_id: qid,
+        assessment_id: row.assessment_id.as_deref(),
+        language,
+        source,
+    };
+    let outcome = store
+        .0
+        .lock()
+        .map_err(|_| "IO: local database lock poisoned".to_string())
+        .and_then(|mut c| attempts::record(&mut c, secrets, &ctx, result));
+    match outcome {
+        Ok(_) => Ok(()),
+        Err(e) if result.mode == Mode::Run => {
+            log::warn!("could not store run attempt: {e}");
+            Ok(())
+        }
+        Err(e) => Err(e),
+    }
 }
 fn test_case(t: &serde_json::Value) -> Result<TestCase, String> {
     Ok(TestCase {

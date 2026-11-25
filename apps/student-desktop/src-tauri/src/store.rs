@@ -133,6 +133,57 @@ const MIGRATIONS: &[(i64, &str)] = &[
     );
     "#,
     ),
+    (
+        4,
+        // Phase 05 (C7). `device_id` and `sync_error` on attempts are ADDED BY PHASE 05.
+        r#"
+    CREATE TABLE device (
+        id INTEGER PRIMARY KEY CHECK (id = 1),
+        device_id TEXT NOT NULL,
+        public_key TEXT NOT NULL,
+        monotonic_seq INTEGER NOT NULL DEFAULT 0
+    );
+    CREATE TABLE attempts (
+        attempt_id TEXT PRIMARY KEY,
+        pack_id TEXT NOT NULL,
+        question_id TEXT NOT NULL,
+        assessment_id TEXT,
+        language TEXT NOT NULL,
+        mode TEXT NOT NULL CHECK (mode IN ('RUN','SUBMIT')),
+        source TEXT NOT NULL,
+        source_sha256 TEXT NOT NULL,
+        verdict TEXT NOT NULL,
+        passed INTEGER NOT NULL,
+        total INTEGER NOT NULL,
+        total_time_ms INTEGER NOT NULL,
+        results_json TEXT NOT NULL,
+        started_at TEXT NOT NULL,
+        finished_at TEXT NOT NULL,
+        monotonic_seq INTEGER NOT NULL,
+        signature TEXT,
+        device_id TEXT NOT NULL,
+        synced_at TEXT,
+        sync_error TEXT
+    );
+    CREATE INDEX idx_attempts_question ON attempts (pack_id, question_id, finished_at);
+    CREATE INDEX idx_attempts_due ON attempts (mode, synced_at, sync_error, monotonic_seq);
+    CREATE TABLE activity_events (
+        event_id TEXT PRIMARY KEY,
+        seq INTEGER NOT NULL,
+        payload_json TEXT NOT NULL,
+        batch_id TEXT
+    );
+    CREATE INDEX idx_activity_pending ON activity_events (batch_id, seq);
+    CREATE TABLE activity_batches (
+        batch_id TEXT PRIMARY KEY,
+        created_at TEXT NOT NULL,
+        event_count INTEGER NOT NULL,
+        sha256 TEXT NOT NULL,
+        gz BLOB,
+        uploaded_at TEXT
+    );
+    "#,
+    ),
 ];
 
 pub fn open(path: &Path) -> rusqlite::Result<Connection> {

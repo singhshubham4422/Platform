@@ -12,7 +12,19 @@ export async function packsRemove(packId:string){desktop();return invoke<void>('
 export async function packsListQuestions(packId:string){desktop();return invoke<QuestionSummary[]>('packs_list_questions',{packId});}
 export async function packsGetQuestion(packId:string,questionId:string){desktop();return invoke<QuestionView>('packs_get_question',{packId,questionId});}
 export async function runQuestion(packId:string,questionId:string,language:string,source:string,mode:'RUN'|'SUBMIT'){desktop();return invoke<RunResult>('run_question',{packId,questionId,language,source,mode});}
-// TODO(offline-integration): connect through phase 07 broker and phase 05 auth/session.
-export async function getPackDownloadUrl(_packId:string):Promise<never>{throw new Error('BROKER_NOT_CONNECTED');}
-// TODO(offline-integration): populate from the phase 07 broker catalog.
-export async function listCatalog():Promise<never>{throw new Error('BROKER_NOT_CONNECTED');}
+export interface PackDownload { url: string; sigUrl: string; sha256: string; size: number; expiresAt: string }
+/** Short-lived signed download links from the broker (C8 `pack-download-url`). RLS decides access. */
+export async function getPackDownloadUrl(packId: string): Promise<PackDownload> {
+  const { callBroker } = await import('./broker');
+  return callBroker<PackDownload>('pack-download-url', { packId });
+}
+/** Downloads, verifies and installs a pack the student is allowed to read. */
+export async function installPackFromBroker(packId: string): Promise<PackInfo> {
+  const d = await getPackDownloadUrl(packId);
+  return packsInstallFromUrl(d.url, d.sigUrl, d.sha256);
+}
+/** Published courses with their newest pack, marked installed / update available / not installed. */
+export async function listCatalog() {
+  const { fetchCatalog } = await import('./catalog');
+  return fetchCatalog(await packsList());
+}

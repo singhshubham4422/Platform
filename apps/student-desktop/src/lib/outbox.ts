@@ -11,6 +11,8 @@
 import type { LanguageId } from '@lplatform/language-config';
 import { ApiRequestError } from './api';
 import { postEvents, postSnapshots, pushDraft, submitCode } from './coding-api';
+import { OFFLINE_FIRST } from './offline-config';
+import { queueActivity } from './activity-queue';
 import { getLocalStore, migrateLegacyBrowserData, type OperationType, type StoreCounts, type StoredDraft } from './local-store';
 
 export interface ActivityEvent {
@@ -22,6 +24,8 @@ export interface ActivityEvent {
   courseId?: string | null;
   /** ADDED BY PHASE 04: identifies activity from an offline course pack. */
   packId?: string | null;
+  assessmentId?: string | null; // ADDED BY PHASE 05
+  language?: string | null; // ADDED BY PHASE 05
   attemptId?: string | null;
   deviceSessionId?: string | null;
   schemaVersion: number;
@@ -110,6 +114,11 @@ export async function initOutbox(): Promise<{ storage: 'sqlite' | 'browser'; mig
 export const isOutboxReady = () => initialized;
 
 export function recordEvent(eventType: string, ctx: Partial<ActivityEvent> = {}, metadata: ActivityEvent['metadata'] = {}): void {
+  if (OFFLINE_FIRST) {
+    // Offline-first (phase 05): events go to local SQLite via Rust and upload as C10 batches.
+    queueActivity(eventType, { questionId: ctx.questionId, packId: ctx.packId, assessmentId: ctx.assessmentId, attemptId: ctx.attemptId, language: ctx.language }, metadata);
+    return;
+  }
   const event: ActivityEvent = { id: uuid(), eventType, clientTs: new Date().toISOString(), schemaVersion: 1, deviceSessionId: deviceSessionId(), ...ctx, metadata };
   void persist(() => getLocalStore().enqueue(event.id, 'EVENT', event.questionId ?? null, event));
 }

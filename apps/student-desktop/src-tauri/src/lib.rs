@@ -1,6 +1,10 @@
+mod activity;
+mod attempts;
+mod device;
 mod packs;
 mod runner;
 pub mod runtimes;
+mod secrets;
 mod store;
 
 use std::sync::Mutex;
@@ -197,6 +201,7 @@ pub fn run() {
             app.manage(Store(Mutex::new(conn)));
             app.manage(runtimes::RuntimeManager::new(dir.clone()));
             app.manage(packs::PackManager::new(dir.clone()));
+            app.manage(secrets::Secrets(Box::new(secrets::KeyringSecrets)));
             if cfg!(debug_assertions) {
                 app.handle().plugin(
                     tauri_plugin_log::Builder::default()
@@ -239,7 +244,16 @@ pub fn run() {
             packs_remove,
             packs_list_questions,
             packs_get_question,
-            run_question
+            run_question,
+            attempts_list,
+            attempts_due,
+            attempts_ack,
+            attempts_park,
+            activity_append,
+            activity_seal_batch,
+            activity_ack_batch,
+            activity_counts,
+            device_info
         ])
         .run(tauri::generate_context!())
         .expect("error while building tauri application");
@@ -367,17 +381,90 @@ fn run_question(
     state: State<'_, Store>,
     pack_manager: State<'_, packs::PackManager>,
     runtime_manager: State<'_, runtimes::RuntimeManager>,
+    secrets: State<'_, secrets::Secrets>,
 ) -> CmdResult<runner::RunResult> {
     packs::run_question(
         &state,
         &pack_manager,
         &runtime_manager,
+        secrets.0.as_ref(),
         &pack_id,
         &question_id,
         &language,
         &source,
         &mode,
     )
+}
+
+// ---- Phase 05: attempts, activity, device (C6) ----
+
+fn lock_store<'a>(
+    state: &'a State<'_, Store>,
+) -> CmdResult<std::sync::MutexGuard<'a, rusqlite::Connection>> {
+    state
+        .0
+        .lock()
+        .map_err(|_| "IO: local database lock poisoned".to_string())
+}
+
+#[tauri::command]
+fn attempts_list(
+    pack_id: Option<String>,
+    question_id: Option<String>,
+    state: State<'_, Store>,
+) -> CmdResult<Vec<attempts::AttemptRow>> {
+    let c = lock_store(&state)?;
+    attempts::list(&c, pack_id.as_deref(), question_id.as_deref()).map_err(|e| format!("IO: {e}"))
+}
+#[tauri::command]
+fn attempts_due(limit: i64, state: State<'_, Store>) -> CmdResult<Vec<attempts::AttemptRow>> {
+    let c = lock_store(&state)?;
+    attempts::due(&c, limit).map_err(|e| format!("IO: {e}"))
+}
+#[tauri::command]
+fn attempts_ack(attempt_ids: Vec<String>, state: State<'_, Store>) -> CmdResult<usize> {
+    let mut c = lock_store(&state)?;
+    attempts::ack(&mut c, &attempt_ids).map_err(|e| format!("IO: {e}"))
+}
+#[tauri::command]
+fn attempts_park(attempt_id: String, error: String, state: State<'_, Store>) -> CmdResult<usize> {
+    let c = lock_store(&state)?;
+    attempts::park(&c, &attempt_id, &error).map_err(|e| format!("IO: {e}"))
+}
+#[tauri::command]
+fn activity_append(
+    events: Vec<serde_json::Value>,
+    state: State<'_, Store>,
+    secrets: State<'_, secrets::Secrets>,
+) -> CmdResult<usize> {
+    let mut c = lock_store(&state)?;
+    activity::append(&mut c, secrets.0.as_ref(), events)
+}
+#[tauri::command]
+fn activity_seal_batch(
+    max_events: Option<i64>,
+    state: State<'_, Store>,
+) -> CmdResult<Option<activity::SealedBatch>> {
+    let mut c = lock_store(&state)?;
+    activity::seal_batch(&mut c, max_events.unwrap_or(2000))
+}
+#[tauri::command]
+fn activity_ack_batch(batch_id: String, state: State<'_, Store>) -> CmdResult<()> {
+    let mut c = lock_store(&state)?;
+    activity::ack_batch(&mut c, &batch_id)
+}
+#[tauri::command]
+fn activity_counts(state: State<'_, Store>) -> CmdResult<activity::ActivityCounts> {
+    let c = lock_store(&state)?;
+    activity::counts(&c).map_err(|e| format!("IO: {e}"))
+}
+#[tauri::command]
+fn device_info(
+    state: State<'_, Store>,
+    secrets: State<'_, secrets::Secrets>,
+) -> CmdResult<device::DeviceInfo> {
+    let c = lock_store(&state)?;
+    device::ensure(&c, secrets.0.as_ref())
 }
 
 #[cfg(target_os = "windows")]

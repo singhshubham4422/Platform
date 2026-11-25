@@ -8,6 +8,8 @@ import { Dashboard, type StudentSection } from './components/Dashboard';
 import { CoursesView, MyResultsView, NotificationsView, PracticeView, StudentSettings } from './workspace/StudentViews';
 import { fetchNotifications } from './lib/coding-api';
 import { PlatformHome } from './platform/PlatformHome';
+import { OfflineApp } from './offline/OfflineApp';
+import { OFFLINE_FIRST } from './lib/offline-config';
 
 interface OpenQuestion {
   questionId: string;
@@ -21,7 +23,7 @@ const ProgrammingWorkspace = lazy(() =>
   import('./workspace/ProgrammingWorkspace').then((module) => ({ default: module.ProgrammingWorkspace })),
 );
 
-export const App: React.FC = () => {
+const LegacyApp: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [isOnline, setIsOnline] = useState<boolean>(navigator.onLine);
@@ -174,5 +176,8 @@ export const App: React.FC = () => {
     </div>
   );
 };
+
+/** VITE_OFFLINE_FIRST=1 selects the offline-first shell (Supabase login + sync); otherwise the legacy app runs unchanged. */
+export const App: React.FC = () => (OFFLINE_FIRST ? <OfflineApp /> : <LegacyApp />);
 
 export default App;
