@@ -8,7 +8,7 @@ BEGIN
   lp_kpi.compute_changed(v_since);
   lp_publish.push_changed();
   UPDATE lp_runs SET finished_at=SYSTIMESTAMP,status='OK' WHERE run_id=v_run;COMMIT;
-EXCEPTION WHEN OTHERS THEN UPDATE lp_runs SET finished_at=SYSTIMESTAMP,status='ERROR',error_text=SUBSTR(SQLERRM,1,4000) WHERE run_id=v_run;COMMIT;RAISE;
+EXCEPTION WHEN OTHERS THEN DECLARE v_err VARCHAR2(4000):=SUBSTR(SQLERRM,1,4000); BEGIN UPDATE lp_runs SET finished_at=SYSTIMESTAMP,status='ERROR',error_text=v_err WHERE run_id=v_run;COMMIT; END; RAISE;
 END;
 /
 BEGIN

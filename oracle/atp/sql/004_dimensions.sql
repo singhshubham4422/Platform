@@ -9,11 +9,11 @@ CREATE OR REPLACE PACKAGE BODY lp_dims AS
     v_base VARCHAR2(2000):=secret('SUPABASE_REST_URL'); v_key VARCHAR2(4000):=secret('SUPABASE_SERVICE_KEY');
     v_resp DBMS_CLOUD_TYPES.RESP; v_body CLOB; v_count NUMBER; v_from NUMBER; v_to NUMBER;
   BEGIN
-    FOR tab IN (SELECT 'questions' table_name,'id,topics,points' columns FROM dual UNION ALL SELECT 'assessments','id,organization_id,question_ids' FROM dual) LOOP
+    FOR tab IN (SELECT 'questions' table_name,'id,topics,points' cols FROM dual UNION ALL SELECT 'assessments','id,organization_id,question_ids' FROM dual) LOOP
       v_from:=0;
       LOOP
         v_to:=v_from+999;
-        v_resp:=DBMS_CLOUD.SEND_REQUEST(credential_name=>NULL,uri=>v_base||'/'||tab.table_name||'?select='||tab.columns,method=>DBMS_CLOUD.METHOD_GET,
+        v_resp:=DBMS_CLOUD.SEND_REQUEST(credential_name=>NULL,uri=>v_base||'/'||tab.table_name||'?select='||tab.cols,method=>DBMS_CLOUD.METHOD_GET,
           headers=>JSON_OBJECT('apikey' VALUE v_key,'Authorization' VALUE 'Bearer '||v_key,'Range' VALUE v_from||'-'||v_to,'Range-Unit' VALUE 'items'));
         v_body:=DBMS_CLOUD.GET_RESPONSE_TEXT(v_resp);
         IF DBMS_CLOUD.GET_RESPONSE_STATUS_CODE(v_resp)<200 OR DBMS_CLOUD.GET_RESPONSE_STATUS_CODE(v_resp)>=300 THEN RAISE_APPLICATION_ERROR(-20041,'Supabase dimension fetch failed: HTTP '||DBMS_CLOUD.GET_RESPONSE_STATUS_CODE(v_resp)); END IF;

@@ -50,7 +50,7 @@ CREATE OR REPLACE PACKAGE BODY lp_publish AS
     push_table('kpi_assessment','assessment_id,user_id',
       q'[SELECT JSON_ARRAYAGG(row_json FORMAT JSON RETURNING CLOB) FROM (SELECT row_json FROM (SELECT JSON_OBJECT('organization_id' VALUE organization_id,'assessment_id' VALUE assessment_id,'user_id' VALUE user_id,'score' VALUE score,'solved' VALUE solved,'total_questions' VALUE total_questions,'time_minutes' VALUE time_minutes,'flags' VALUE flags FORMAT JSON,'computed_at' VALUE TO_CHAR(computed_at AT TIME ZONE 'UTC','YYYY-MM-DD"T"HH24:MI:SS.FF3"Z"') RETURNING CLOB) row_json,changed_at FROM lp_kpi_assessment WHERE published_at IS NULL OR changed_at>published_at ORDER BY changed_at) WHERE ROWNUM<=500)]',v_key,v_base,v_run,3);
     UPDATE lp_runs SET finished_at=SYSTIMESTAMP,status='OK' WHERE run_id=v_run;COMMIT;
-  EXCEPTION WHEN OTHERS THEN UPDATE lp_runs SET finished_at=SYSTIMESTAMP,status='ERROR',error_text=SUBSTR(SQLERRM,1,4000) WHERE run_id=v_run;COMMIT;RAISE;
+  EXCEPTION WHEN OTHERS THEN DECLARE v_err VARCHAR2(4000):=SUBSTR(SQLERRM,1,4000); BEGIN UPDATE lp_runs SET finished_at=SYSTIMESTAMP,status='ERROR',error_text=v_err WHERE run_id=v_run;COMMIT; END; RAISE;
   END;
 END lp_publish;
 /

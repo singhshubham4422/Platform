@@ -13,8 +13,8 @@ CREATE OR REPLACE PACKAGE BODY lp_ingest AS
     v_uri VARCHAR2(4000):=secret('OCI_ACTIVITY_URI'); v_cred VARCHAR2(128):=secret('OCI_CREDENTIAL_NAME'); v_run NUMBER; v_rows NUMBER;
   BEGIN
     INSERT INTO lp_runs(started_at,status) VALUES(SYSTIMESTAMP,'RUNNING') RETURNING run_id INTO v_run;
-    FOR o IN (SELECT object_name,etag FROM DBMS_CLOUD.LIST_OBJECTS(v_cred,v_uri) WHERE object_name LIKE p_prefix||'%') LOOP
-      DECLARE v_object VARCHAR2(1024):=o.object_name; v_count NUMBER:=0;
+    FOR o IN (SELECT object_name,checksum etag FROM DBMS_CLOUD.LIST_OBJECTS(v_cred,v_uri) WHERE object_name LIKE p_prefix||'%') LOOP
+      DECLARE v_object VARCHAR2(1024):=o.object_name; v_count NUMBER:=0; v_err VARCHAR2(4000);
       BEGIN
         SELECT COUNT(*) INTO v_count FROM lp_ingested_files WHERE object_name=v_object;
         IF v_count=0 THEN
@@ -41,8 +41,9 @@ CREATE OR REPLACE PACKAGE BODY lp_ingest AS
           COMMIT;
         END IF;
       EXCEPTION WHEN OTHERS THEN
+        v_err:=SUBSTR('Object '||v_object||': '||SQLERRM,1,4000);
         ROLLBACK;
-        INSERT INTO lp_runs(started_at,finished_at,status,error_text) VALUES(SYSTIMESTAMP,SYSTIMESTAMP,'ERROR',SUBSTR('Object '||v_object||': '||SQLERRM,1,4000));
+        INSERT INTO lp_runs(started_at,finished_at,status,error_text) VALUES(SYSTIMESTAMP,SYSTIMESTAMP,'ERROR',v_err);
         COMMIT;
       END;
     END LOOP;
