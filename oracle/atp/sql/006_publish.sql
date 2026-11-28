@@ -30,7 +30,7 @@ CREATE OR REPLACE PACKAGE BODY lp_publish AS
     v_body CLOB;v_count NUMBER;
   BEGIN
     LOOP
-      EXECUTE IMMEDIATE 'SELECT COUNT(*) FROM (SELECT 1 FROM '||p_table||' WHERE (published_at IS NULL OR changed_at>published_at) AND ROWNUM<=500)' INTO v_count;
+      EXECUTE IMMEDIATE 'SELECT COUNT(*) FROM (SELECT 1 FROM lp_'||p_table||' WHERE (published_at IS NULL OR changed_at>published_at) AND ROWNUM<=500)' INTO v_count;
       IF v_count=0 THEN EXIT;END IF;
       EXECUTE IMMEDIATE p_query INTO v_body;
       IF v_body IS NULL OR DBMS_LOB.GETLENGTH(v_body)=0 THEN EXIT;END IF;
