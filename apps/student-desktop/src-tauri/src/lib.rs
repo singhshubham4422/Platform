@@ -538,11 +538,36 @@ const CREDENTIAL_SERVICE: &str = "com.platform.student";
 const CREDENTIAL_USER: &str = "auth-session";
 
 #[cfg(target_os = "windows")]
+const CREDENTIAL_CHUNK_CHARS: usize = 900;
+
+#[cfg(target_os = "windows")]
 fn store_session_in_keyring(service: &str, user: &str, session: &str) -> Result<(), String> {
-    let entry = keyring::Entry::new(service, user)
+    // Windows Credential Manager caps CredentialBlobSize at 2560 bytes (1280 UTF-16 chars).
+    // Split large Supabase session JSONs across numbered entries under the same service.
+    delete_session_from_keyring(service, user)?;
+    let chars: Vec<char> = session.chars().collect();
+    if chars.len() <= CREDENTIAL_CHUNK_CHARS {
+        let entry = keyring::Entry::new(service, user)
+            .map_err(|error| format!("Windows Credential Manager unavailable: {error}"))?;
+        return entry
+            .set_password(session)
+            .map_err(|error| format!("Could not store credentials securely: {error}"));
+    }
+    let chunks: Vec<String> = chars
+        .chunks(CREDENTIAL_CHUNK_CHARS)
+        .map(|c| c.iter().collect())
+        .collect();
+    for (idx, chunk) in chunks.iter().enumerate() {
+        let entry = keyring::Entry::new(service, &format!("{user}:{idx}"))
+            .map_err(|error| format!("Windows Credential Manager unavailable: {error}"))?;
+        entry
+            .set_password(chunk)
+            .map_err(|error| format!("Could not store credentials securely: {error}"))?;
+    }
+    let header = keyring::Entry::new(service, user)
         .map_err(|error| format!("Windows Credential Manager unavailable: {error}"))?;
-    entry
-        .set_password(session)
+    header
+        .set_password(&format!("chunks:{}", chunks.len()))
         .map_err(|error| format!("Could not store credentials securely: {error}"))
 }
 
@@ -550,21 +575,50 @@ fn store_session_in_keyring(service: &str, user: &str, session: &str) -> Result<
 fn load_session_from_keyring(service: &str, user: &str) -> Result<Option<String>, String> {
     let entry = keyring::Entry::new(service, user)
         .map_err(|error| format!("Windows Credential Manager unavailable: {error}"))?;
-    match entry.get_password() {
-        Ok(session) => Ok(Some(session)),
-        Err(keyring::Error::NoEntry) => Ok(None),
-        Err(error) => Err(format!("Could not read secure credentials: {error}")),
+    let val = match entry.get_password() {
+        Ok(session) => session,
+        Err(keyring::Error::NoEntry) => return Ok(None),
+        Err(error) => return Err(format!("Could not read secure credentials: {error}")),
+    };
+    let Some(count_str) = val.strip_prefix("chunks:") else {
+        return Ok(Some(val));
+    };
+    let count: usize = count_str
+        .parse()
+        .map_err(|_| "Corrupt secure credential header".to_string())?;
+    let mut out = String::new();
+    for idx in 0..count {
+        let part = keyring::Entry::new(service, &format!("{user}:{idx}"))
+            .map_err(|error| format!("Windows Credential Manager unavailable: {error}"))?;
+        match part.get_password() {
+            Ok(s) => out.push_str(&s),
+            Err(keyring::Error::NoEntry) => return Ok(None),
+            Err(error) => return Err(format!("Could not read secure credentials: {error}")),
+        }
     }
+    Ok(Some(out))
 }
 
 #[cfg(target_os = "windows")]
 fn delete_session_from_keyring(service: &str, user: &str) -> Result<(), String> {
     let entry = keyring::Entry::new(service, user)
         .map_err(|error| format!("Windows Credential Manager unavailable: {error}"))?;
+    let existing = entry.get_password().ok();
     match entry.delete_credential() {
-        Ok(()) | Err(keyring::Error::NoEntry) => Ok(()),
-        Err(error) => Err(format!("Could not remove secure credentials: {error}")),
+        Ok(()) | Err(keyring::Error::NoEntry) => {}
+        Err(error) => return Err(format!("Could not remove secure credentials: {error}")),
     }
+    if let Some(count) = existing
+        .and_then(|v| v.strip_prefix("chunks:").map(str::to_owned))
+        .and_then(|n| n.parse::<usize>().ok())
+    {
+        for idx in 0..count {
+            if let Ok(part) = keyring::Entry::new(service, &format!("{user}:{idx}")) {
+                let _ = part.delete_credential();
+            }
+        }
+    }
+    Ok(())
 }
 
 #[tauri::command]

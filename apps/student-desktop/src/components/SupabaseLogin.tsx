@@ -50,8 +50,14 @@ export const SupabaseLogin: React.FC<Props> = ({ onSuccess, client }) => {
         return;
       }
       onSuccess(profile);
-    } catch {
-      setError('Could not reach the sign-in service. Check your connection and try again.');
+    } catch (err) {
+      console.error('[SupabaseLogin]', err);
+      const msg = err instanceof Error ? err.message : '';
+      if (msg && !/fetch|network|timeout|offline/i.test(msg)) {
+        setError(`Sign-in failed: ${msg}`);
+      } else {
+        setError('Could not reach the sign-in service. Check your connection and try again.');
+      }
     } finally {
       setBusy(false);
     }
