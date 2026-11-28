@@ -8,7 +8,7 @@
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { createReadStream, createWriteStream, existsSync } from 'node:fs';
-import { cp, mkdir, readdir, rm, stat, writeFile } from 'node:fs/promises';
+import { cp, lstat, mkdir, readdir, rm, stat, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { pipeline } from 'node:stream/promises';
@@ -193,10 +193,7 @@ async function fetchJava(work) {
     ],
     { stdio: 'inherit' },
   );
-  await cp(path.join(home, 'legal'), path.join(target, 'legal'), {
-    recursive: true,
-    force: true,
-  }).catch(() => undefined);
+  // jlink already copies the legal notices of every module it includes into `legal/`.
   return {
     language: 'JAVA',
     version,
@@ -239,6 +236,20 @@ async function sizeOf(dir) {
   return total;
 }
 
+/** Tauri refuses to bundle a symlink whose target is missing, so remove any such link. */
+async function dropDanglingLinks(dir) {
+  for (const e of await readdir(dir, { withFileTypes: true, recursive: true })) {
+    const file = path.join(e.parentPath ?? e.path, e.name);
+    if (!(await lstat(file)).isSymbolicLink()) continue;
+    try {
+      await stat(file);
+    } catch {
+      log(`removing broken link ${path.relative(outDir, file)}`);
+      await rm(file, { force: true });
+    }
+  }
+}
+
 async function main() {
   if (process.argv.includes('--clean')) await rm(cacheDir, { recursive: true, force: true });
   for (const d of ['python', 'zig', 'java'])
@@ -248,6 +259,7 @@ async function main() {
   await mkdir(work, { recursive: true });
   try {
     const runtimes = [await fetchPython(work), ...(await fetchZig(work)), await fetchJava(work)];
+    for (const d of ['python', 'zig', 'java']) await dropDanglingLinks(path.join(outDir, d));
     const manifest = {
       schemaVersion: 1,
       os: hostOs,

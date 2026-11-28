@@ -174,27 +174,32 @@ fn execute(
     let mut child = cmd
         .spawn()
         .map_err(|e| format!("IO: unable to start runtime: {e}"))?;
+    // Job CPU time is summed over all of a compiler's parallel processes.
     #[cfg(windows)]
-    // Like the Unix limits, leave the JVM room for its own overhead beyond the heap.
-    let job_mb = if rt.language == "JAVA" {
-        mem_mb + 512
-    } else {
-        mem_mb
-    };
-    // A compiler is trusted code that may run parallel helper processes (zig/clang do).
-    // Job CPU time is summed over all of the compiler's parallel processes.
     let cpu_time = if compile {
         let cores = thread::available_parallelism().map_or(4, |n| n.get()) as u32;
         cpu_time.saturating_mul(cores.max(1))
     } else {
         cpu_time
     };
-    let (job_mb, max_processes) = if compile {
-        (job_mb.max(2048), 64)
-    } else {
-        (job_mb, 16)
+    #[cfg(windows)]
+    let job = {
+        // Like the Unix limits, leave the JVM room for its own overhead beyond the heap.
+        let job_mb = if rt.language == "JAVA" {
+            mem_mb + 512
+        } else {
+            mem_mb
+        };
+        // A compiler is trusted code that may run parallel helper processes (zig/clang do).
+        let (job_mb, max_processes) = if compile {
+            (job_mb.max(2048), 64)
+        } else {
+            (job_mb, 16)
+        };
+        limits_windows::assign_job(Some(child.id()), job_mb, cpu_time, max_processes)
     };
-    let job = match limits_windows::assign_job(Some(child.id()), job_mb, cpu_time, max_processes) {
+    #[cfg(windows)]
+    let job = match job {
         Ok(job) => job,
         Err(error) => {
             let _ = child.kill();
