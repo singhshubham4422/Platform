@@ -26,7 +26,7 @@ CREATE OR REPLACE PACKAGE BODY lp_ingest AS
               'columnpath' VALUE ' ["$.eventId","$.seq","$.eventType","$.clientTs","$.userId","$.organizationId","$.deviceId","$.packId","$.questionId","$.assessmentId","$.attemptId","$.language","$.metadata"] ')
           );
           MERGE INTO lp_stg_activity t USING (
-            SELECT event_id,seq,event_type,TO_TIMESTAMP_TZ(client_ts,'YYYY-MM-DD"T"HH24:MI:SS.FF3"Z"') client_ts,user_id,organization_id,device_id,pack_id,question_id,assessment_id,attempt_id,language,metadata
+            SELECT event_id,seq,event_type,FROM_TZ(TO_TIMESTAMP(client_ts,'YYYY-MM-DD"T"HH24:MI:SS.FF3"Z"'),'UTC') client_ts,user_id,organization_id,device_id,pack_id,question_id,assessment_id,attempt_id,language,metadata
             FROM (SELECT s.*,ROW_NUMBER() OVER(PARTITION BY event_id ORDER BY seq) rn FROM lp_load_activity s
               WHERE event_id IS NOT NULL AND user_id IS NOT NULL AND event_type IS NOT NULL AND TRIM(event_type) IS NOT NULL AND seq IS NOT NULL
                 AND VALIDATE_CONVERSION(client_ts AS TIMESTAMP WITH TIME ZONE,'YYYY-MM-DD"T"HH24:MI:SS.FF3"Z"')=1)

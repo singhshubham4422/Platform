@@ -126,7 +126,7 @@ try {
   for (const e of raw.filter((x) => x.userId && x.clientTs && x.eventType && x.eventId).sort((a, b) => a.seq - b.seq)) {
     await conn.execute(`MERGE INTO lp_stg_activity t USING (SELECT :id event_id FROM dual) s ON (t.event_id = s.event_id) WHEN NOT MATCHED THEN
       INSERT(event_id,seq,event_type,client_ts,user_id,organization_id,device_id,pack_id,question_id,assessment_id,attempt_id,language,metadata,object_name,loaded_at)
-      VALUES(:id,:seq,:ty,TO_TIMESTAMP_TZ(:ts,'YYYY-MM-DD"T"HH24:MI:SS.FF3"Z"'),:u,:o,:d,:p,:q,:a,:at,:l,:m,'VERIFY_FIXTURE',SYSTIMESTAMP)`,
+      VALUES(:id,:seq,:ty,FROM_TZ(TO_TIMESTAMP(:ts,'YYYY-MM-DD"T"HH24:MI:SS.FF3"Z"'),'UTC'),:u,:o,:d,:p,:q,:a,:at,:l,:m,'VERIFY_FIXTURE',SYSTIMESTAMP)`,
     { id: e.eventId, seq: Number(e.seq), ty: e.eventType, ts: e.clientTs, u: e.userId, o: e.organizationId ?? null, d: e.deviceId ?? null, p: e.packId ?? null, q: e.questionId ?? null, a: e.assessmentId ?? null, at: e.attemptId ?? null, l: e.language ?? null, m: JSON.stringify(e.metadata ?? {}) });
   }
   await conn.commit();
