@@ -1,5 +1,5 @@
 {
-  "name": "@lplatform/student-desktop",
+  "name": "@platform/student-desktop",
   "version": "0.4.0",
   "private": true,
   "type": "module",
@@ -14,10 +14,11 @@
     "lint": "eslint src/",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "runtimes:fetch": "node scripts/fetch-runtimes.mjs"
   },
   "dependencies": {
-    "@lplatform/language-config": "workspace:*",
+    "@platform/language-config": "workspace:*",
     "@monaco-editor/react": "4.7.0",
     "@supabase/supabase-js": "2.119.2",
     "@tauri-apps/api": "^2.0.0",

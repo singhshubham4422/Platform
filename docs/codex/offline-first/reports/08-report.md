@@ -11,7 +11,7 @@ Written by Claude, 2026-11-25. Codex wrote the files during its run but left the
 ## 2. Status table
 | Task | Status | Command | Result |
 | --- | --- | --- | --- |
-| Reference calculator + fixtures | Verified | `pnpm --filter @lplatform/kpi-calc test` | 7 pass, 0 fail |
+| Reference calculator + fixtures | Verified | `pnpm --filter @platform/kpi-calc test` | 7 pass, 0 fail |
 | SQL static checks (no secrets, columns match the Supabase migration, `lp_secrets` used) | Verified | same | included in the 7 |
 | ATP SQL executes and matches `kpi-calc` | Blocked | `node oracle/atp/verify.mjs` | `SKIPPED: set ATP_* env` (exit 0) |
 | Keep-alive workflow | Implemented, not verified | – | needs GitHub secrets and a repo with Actions |

@@ -125,7 +125,12 @@ impl Job {
     }
 }
 
-pub fn assign_job(pid: Option<u32>, memory_mb: u64, cpu_limit: Duration) -> Result<Job, String> {
+pub fn assign_job(
+    pid: Option<u32>,
+    memory_mb: u64,
+    cpu_limit: Duration,
+    max_processes: u32,
+) -> Result<Job, String> {
     unsafe {
         let job = CreateJobObjectW(ptr::null(), ptr::null());
         if job.is_null() {
@@ -153,7 +158,7 @@ pub fn assign_job(pid: Option<u32>, memory_mb: u64, cpu_limit: Duration) -> Resu
             | JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE
             | JOB_OBJECT_LIMIT_DIE_ON_UNHANDLED_EXCEPTION;
         info.ProcessMemoryLimit = memory_mb.saturating_mul(1024 * 1024) as usize;
-        info.BasicLimitInformation.ActiveProcessLimit = 16;
+        info.BasicLimitInformation.ActiveProcessLimit = max_processes;
         // PerJobUserTimeLimit is in 100-nanosecond ticks.
         info.BasicLimitInformation.PerJobUserTimeLimit =
             ((cpu_limit.as_nanos() / 100).min(i64::MAX as u128)) as i64;

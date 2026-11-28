@@ -4,8 +4,8 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "L_Platform",
-    template: "%s · L_Platform",
+    default: "PLATFORM",
+    template: "%s · PLATFORM",
   },
   description:
     "Unified multi-tenant educational learning and programming platform for schools, teachers, and students.",

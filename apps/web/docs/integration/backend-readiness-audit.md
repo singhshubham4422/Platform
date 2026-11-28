@@ -115,7 +115,7 @@ Relevant consumers and coupling found during discovery:
   on logout/context changes; backend permissions remain authoritative.
 - [Global search](../../src/app/admin/search/page.tsx) runs six list calls for organizations,
   users, classes, sections, courses and allocations. It is not backed by a search endpoint.
-- Mock domain data and platform settings persist in `lplatform.mock.database`; the mock session
+- Mock domain data and platform settings persist in `platform.mock.database`; the mock session
   and failure simulation also use browser storage. These are not legitimate production server
   state. The theme controlled through `next-themes` is a legitimate local UI preference.
 - [Zod validation](../../src/lib/validation/schemas.ts) and existing domain types reflect mock

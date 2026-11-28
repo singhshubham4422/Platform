@@ -555,7 +555,7 @@ describe("user and administrator management", () => {
       services.users.create({
         firstName: "Platform",
         lastName: "Root",
-        email: "root@lplatform.dev",
+        email: "root@platform.dev",
         role: "PLATFORM_ADMIN",
         organizationId: null,
         status: "ACTIVE",
@@ -703,29 +703,29 @@ describe("reports", () => {
 describe("settings", () => {
   it("persists updates and resets demo data", async () => {
     const settings = await services.settings.get();
-    expect(settings.platformName).toBe("L_Platform");
+    expect(settings.platformName).toBe("PLATFORM");
 
     const updated = await services.settings.update({
       ...settings,
-      platformName: "L_Platform Console",
+      platformName: "PLATFORM Console",
       theme: "dark",
       notifications: { ...settings.notifications, weeklyDigest: true },
       sessionPreferences: { ...settings.sessionPreferences, idleTimeoutMinutes: 45 },
     });
-    expect(updated.platformName).toBe("L_Platform Console");
+    expect(updated.platformName).toBe("PLATFORM Console");
     expect(updated.theme).toBe("dark");
     expect(updated.sessionPreferences.idleTimeoutMinutes).toBe(45);
 
     const reread = await services.settings.get();
     expect(reread).toMatchObject({
-      platformName: "L_Platform Console",
+      platformName: "PLATFORM Console",
       theme: "dark",
       sessionPreferences: { idleTimeoutMinutes: 45, requireReauthentication: true },
     });
 
     await services.settings.resetDemoData();
     const reset = await services.settings.get();
-    expect(reset.platformName).toBe("L_Platform");
+    expect(reset.platformName).toBe("PLATFORM");
     expect(reset.theme).toBe("system");
   });
 });

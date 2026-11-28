@@ -66,7 +66,7 @@ export async function publishPack({ request, body, env, createClient, oci = crea
   const sig = await packFormat.signDetached(built.bytes, envOrThrow(env, 'PACK_SIGNING_KEY'));
   const objectPath = `packs/course/${courseId}/${version}.lpack`;
   try {
-    await oci.putObject({ objectName:objectPath, bytes:built.bytes, contentType:'application/vnd.lplatform.pack' });
+    await oci.putObject({ objectName:objectPath, bytes:built.bytes, contentType:'application/vnd.platform.pack' });
     await oci.putObject({ objectName:`${objectPath}.sig`, bytes:new TextEncoder().encode(sig), contentType:'text/plain' });
   } catch { console.error('publish-pack OCI upload failed; any partial object is an orphan', courseId, version); throw new Error('PACK_UPLOAD_FAILED'); }
   const inserted = await serviceClient.from('course_pack_versions').insert({ pack_id:`${courseId}@${version}`, kind:'COURSE', course_id:courseId, version, object_path:objectPath, sha256:built.sha256, size:built.bytes.length, min_app_version:'0.1.0', published_by:user.id }).select('pack_id').single();

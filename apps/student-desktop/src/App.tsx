@@ -107,7 +107,7 @@ const LegacyApp: React.FC = () => {
   if (loading) {
     return (
       <div className="loading-screen">
-        <span className="brand-mark">LP</span>
+        <span className="brand-mark">P</span>
         <p>Opening Student Workspace…</p>
       </div>
     );
@@ -138,7 +138,7 @@ const LegacyApp: React.FC = () => {
       />
       <main className="hr-main">
         {open ? (
-          <Suspense fallback={<div className="loading-screen"><span className="brand-mark">LP</span><p>Loading programming workspace…</p></div>}>
+          <Suspense fallback={<div className="loading-screen"><span className="brand-mark">P</span><p>Loading programming workspace…</p></div>}>
             <ProgrammingWorkspace
               key={`${open.questionId}-${open.assignmentId ?? ''}`}
               questionId={open.questionId}

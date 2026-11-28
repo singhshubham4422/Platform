@@ -5,7 +5,7 @@ interface MockApiConfig {
   failureRate: number;
 }
 
-const FAILURE_RATE_KEY = "lplatform.mock.failureRate";
+const FAILURE_RATE_KEY = "platform.mock.failureRate";
 const DEFAULT_CONFIG: MockApiConfig = { latencyMs: 220, failureRate: 0 };
 
 let config: MockApiConfig = { ...DEFAULT_CONFIG };

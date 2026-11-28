@@ -87,6 +87,6 @@ async function main() {
       console.log('OK');
     } catch(e) { console.error(e.message); process.exitCode=1; } return;
   }
-  throw new Error('Usage: lplatform-pack <keygen|lang-pack|lang-index|course-pack|verify|import-jplatform> [options]');
+  throw new Error('Usage: platform-pack <keygen|lang-pack|lang-index|course-pack|verify|import-jplatform> [options]');
 }
 main().catch((e)=>{console.error(e.message);process.exitCode=1;});

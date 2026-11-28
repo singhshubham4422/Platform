@@ -47,9 +47,9 @@ function AcceptInvitation() {
           <CardDescription>
             {done
               ? done.role === "STUDENT"
-                ? "Install the L_Platform student app and sign in with the code e-mailed to you once your college enrols you in a section."
+                ? "Install the PLATFORM student app and sign in with the code e-mailed to you once your college enrols you in a section."
                 : `Sign in as ${done.email} with the password you just set.`
-              : "Set up your L_Platform account. The link works once and expires after 7 days."}
+              : "Set up your PLATFORM account. The link works once and expires after 7 days."}
           </CardDescription>
         </CardHeader>
         <CardContent>

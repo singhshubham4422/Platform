@@ -1,4 +1,4 @@
-// Judge worker process: `pnpm --filter @lplatform/api judge:worker`.
+// Judge worker process: `pnpm --filter @platform/api judge:worker`.
 // Separate OS process from the API. Claims queued execution jobs, sends them to the configured
 // provider (Judge0 in production) and persists authentic results.
 import '../../load-env.js';

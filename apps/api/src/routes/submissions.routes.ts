@@ -14,7 +14,7 @@ import {
   users,
 } from '../db/schema/index.js';
 import { Errors } from '../lib/errors.js';
-import { isLanguageId } from '@lplatform/language-config';
+import { isLanguageId } from '@platform/language-config';
 import { withRequestTx, notify } from '../lib/scoped-sql.js';
 import { recordSkillEvidenceForSubmission } from '../modules/analytics/skills.js';
 import { enforceJudgeQuota } from '../modules/coding/coding.access.js';

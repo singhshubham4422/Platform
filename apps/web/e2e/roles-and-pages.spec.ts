@@ -9,7 +9,7 @@ import { expect, test, type Page } from "@playwright/test";
 const ROLES = [
   {
     key: "owner",
-    email: "admin@lplatform.dev",
+    email: "admin@platform.dev",
     password: "Admin@123",
     home: /\/admin\/dashboard/,
     pages: [

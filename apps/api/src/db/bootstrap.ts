@@ -29,7 +29,7 @@ export async function bootstrap(): Promise<void> {
   if (password.length < 16 || !/[a-z]/.test(password) || !/[A-Z]/.test(password) || !/\d/.test(password)) {
     throw new Error('PLATFORM_OWNER_PASSWORD must be at least 16 characters with upper, lower case and digits.');
   }
-  if (/@(lplatform\.dev|riverside\.edu|demo-college\.test)$/.test(email) || email.endsWith('.test')) {
+  if (/@(platform\.dev|riverside\.edu|demo-college\.test)$/.test(email) || email.endsWith('.test')) {
     throw new Error('Refusing to bootstrap with a demo/test e-mail domain.');
   }
 
@@ -50,7 +50,7 @@ export async function bootstrap(): Promise<void> {
     );
     await client.query(`INSERT INTO credentials (user_id, password_hash) VALUES ($1, $2)`, [id, await hashPassword(password)]);
     await client.query(
-      `INSERT INTO platform_settings (id, platform_name, support_email) VALUES ('default', 'L_Platform', $1) ON CONFLICT (id) DO NOTHING`,
+      `INSERT INTO platform_settings (id, platform_name, support_email) VALUES ('default', 'PLATFORM', $1) ON CONFLICT (id) DO NOTHING`,
       [process.env.PLATFORM_SUPPORT_EMAIL?.trim() || email],
     );
     await client.query(

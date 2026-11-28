@@ -15,25 +15,25 @@ const release: Release = {
   assets: [
     {
       id: 1,
-      name: 'L_Platform.Student_0.3.0_x64-setup.exe',
+      name: 'PLATFORM.Student_0.3.0_x64-setup.exe',
       size: 10,
       browser_download_url: 'https://dl/exe',
     },
     {
       id: 2,
-      name: 'L_Platform.Student_0.3.0_x64_en-US.msi',
+      name: 'PLATFORM.Student_0.3.0_x64_en-US.msi',
       size: 11,
       browser_download_url: 'https://dl/msi',
     },
     {
       id: 3,
-      name: 'L_Platform.Student_0.3.0_universal.dmg',
+      name: 'PLATFORM.Student_0.3.0_universal.dmg',
       size: 12,
       browser_download_url: 'https://dl/dmg',
     },
     {
       id: 4,
-      name: 'L_Platform.Student_0.3.0_amd64.AppImage',
+      name: 'PLATFORM.Student_0.3.0_amd64.AppImage',
       size: 13,
       browser_download_url: 'https://dl/appimage',
     },

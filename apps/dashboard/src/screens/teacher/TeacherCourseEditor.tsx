@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import type { LanguageId } from '@lplatform/language-config';
-import { LANGUAGES } from '@lplatform/language-config';
+import type { LanguageId } from '@platform/language-config';
+import { LANGUAGES } from '@platform/language-config';
 import { useAuth } from '../../auth/AuthProvider';
 import { useDataSource } from '../../data/DataProvider';
 import { useAsync } from '../../lib/use-async';

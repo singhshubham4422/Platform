@@ -22,7 +22,7 @@ UI → hooks (TanStack Query) → services (src/lib/api/index.ts)
 
 ## Persistence
 
-- Key: `lplatform.mock.database`
+- Key: `platform.mock.database`
 - Version: `2`. A stored database with a different version is discarded and reseeded.
 - `getDb()` loads localStorage or seeds and caches in memory; `mutateDb()` runs a mutator and
   persists; `resetDb()` reseeds and persists.
@@ -55,7 +55,7 @@ invitations exist only for Greenwood and BrightPath.
 `src/lib/api/delay.ts` wraps every adapter call in `mockRequest(operation, resolver)`:
 
 - 220 ms base latency plus up to 120 ms jitter (0 when `latencyMs` is 0).
-- Optional failure rate (0–1) persisted under `lplatform.mock.failureRate`; failures throw
+- Optional failure rate (0–1) persisted under `platform.mock.failureRate`; failures throw
   `MOCK_UNAVAILABLE` (HTTP 503 semantics).
 - Tests call `configureMockApi({ latencyMs: 0 })` for determinism.
 - The Settings page exposes the same reset flow used by tests: `services.settings.resetDemoData()`.
@@ -90,7 +90,7 @@ and correlation ID. The `ALL` sentinel disables a filter.
 ## Session boundary
 
 `src/lib/mock/session.ts` stores the mock session in localStorage
-(`lplatform.mock.session`) and sets the cookie `lplatform.mock.session=1`. `middleware.ts` uses
+(`platform.mock.session`) and sets the cookie `platform.mock.session=1`. `middleware.ts` uses
 the cookie only to redirect `/admin` and `/login`. This is **not authentication**; it must never be
 presented as security. Demo credentials live as constants in `src/lib/api/auth.service.ts` and are
 not persisted to the database.

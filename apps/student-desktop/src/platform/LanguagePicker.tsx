@@ -1,4 +1,4 @@
-import { getLanguage, type LanguageId } from '@lplatform/language-config';
+import { getLanguage, type LanguageId } from '@platform/language-config';
 const key=(id:string)=>`lp_platform_lang_${id}`;
 export function LanguagePicker({packId,languages,value,onChange}:{packId:string;languages:string[];value:LanguageId;onChange:(v:LanguageId)=>void}){
  const opts=languages.filter((x):x is LanguageId=>Boolean(getLanguage(x)));

@@ -1,8 +1,8 @@
 import type { UserRole } from "@/types";
 
-export const SESSION_KEY = "lplatform.mock.session";
-export const SESSION_COOKIE = "lplatform.mock.session";
-export const ROLE_COOKIE = "lplatform.role";
+export const SESSION_KEY = "platform.mock.session";
+export const SESSION_COOKIE = "platform.mock.session";
+export const ROLE_COOKIE = "platform.role";
 
 export interface MockSession {
   userId: string;

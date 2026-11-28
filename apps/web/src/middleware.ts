@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-const SESSION_COOKIE = "lplatform.mock.session";
-const ROLE_COOKIE = "lplatform.role";
+const SESSION_COOKIE = "platform.mock.session";
+const ROLE_COOKIE = "platform.role";
 
 const DEVELOPER_RESTRICTED_PREFIXES = [
   "/admin/dashboard",

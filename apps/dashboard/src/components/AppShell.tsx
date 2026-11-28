@@ -49,7 +49,7 @@ export function AppShell({ profile }: { profile: Profile }) {
             L
           </span>
           <div>
-            <div>L_Platform</div>
+            <div>PLATFORM</div>
             <div className="sidebar-role">{label(profile.role)}</div>
           </div>
         </div>

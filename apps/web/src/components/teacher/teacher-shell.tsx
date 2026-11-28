@@ -99,7 +99,7 @@ function TeacherBrand({ collapsed = false }: { collapsed?: boolean }) {
       {!collapsed && (
         <span className="min-w-0">
           <span className="text-sidebar-foreground block truncate text-sm font-bold tracking-tight">
-            L Platform
+            PLATFORM
           </span>
           <span className="text-sidebar-muted block text-[11px] font-medium">Teacher Portal</span>
         </span>
@@ -452,7 +452,7 @@ export function TeacherShell({ children }: { children: React.ReactNode }) {
 
         <main className="page-container w-full flex-1 py-6 lg:py-8">{children}</main>
         <footer className="page-container pt-2 pb-6">
-          <p className="text-muted-foreground text-xs">L Platform · Teacher console</p>
+          <p className="text-muted-foreground text-xs">PLATFORM · Teacher console</p>
         </footer>
       </div>
     </div>

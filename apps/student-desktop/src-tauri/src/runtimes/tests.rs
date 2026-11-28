@@ -484,7 +484,7 @@ fn valid_runtime_install_records_metadata_and_leaves_the_runtime_folder() {
         assert_eq!(installed.version, entry.version);
         assert!(
             Path::new(&installed.path)
-                .join(".lplatform-runtime.json")
+                .join(".platform-runtime.json")
                 .is_file()
         );
         assert_eq!(

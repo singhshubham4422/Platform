@@ -4,7 +4,7 @@
 
 ## Decision
 
-Use L_Platform's existing Fastify + TypeScript + Drizzle + PostgreSQL backend as the initial modular monolith and authoritative academic system. This is evidence-based and revises the requested “existing Express” assumption: no Express backend exists in the inspected L project. Keep its deployed database choice if deployment confirms it; do not introduce Oracle or Prisma.
+Use PLATFORM's existing Fastify + TypeScript + Drizzle + PostgreSQL backend as the initial modular monolith and authoritative academic system. This is evidence-based and revises the requested “existing Express” assumption: no Express backend exists in the inspected L project. Keep its deployed database choice if deployment confirms it; do not introduce Oracle or Prisma.
 
 ```text
 Tauri student app (React/TS, Rust native services, local cache)

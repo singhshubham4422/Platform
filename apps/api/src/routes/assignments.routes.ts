@@ -1,5 +1,5 @@
 import { withRequestTx, notify } from '../lib/scoped-sql.js';
-import { isLanguageId } from '@lplatform/language-config';
+import { isLanguageId } from '@platform/language-config';
 
 function normalizeLanguages(value: unknown): string[] {
   const list = Array.isArray(value) ? value.map((v) => String(v).toUpperCase()).filter((v) => isLanguageId(v)) : [];

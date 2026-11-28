@@ -24,7 +24,7 @@ export async function isRestrictedRoleAvailable(): Promise<boolean> {
   if (rlsRoleAvailableCache !== null) return rlsRoleAvailableCache;
   try {
     const res = await pool.query(
-      "SELECT 1 FROM pg_roles WHERE rolname = 'lplatform_app' AND rolbypassrls = false",
+      "SELECT 1 FROM pg_roles WHERE rolname = 'platform_app' AND rolbypassrls = false",
     );
     rlsRoleAvailableCache = (res.rowCount ?? 0) > 0;
   } catch {

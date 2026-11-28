@@ -118,7 +118,7 @@ await app.register(rateLimit, {
 await app.register(swagger, {
   openapi: {
     info: {
-      title: 'L_Platform Unified API',
+      title: 'PLATFORM Unified API',
       description: 'Educational programming platform multi-tenant API',
       version: '1.0.0',
     },
@@ -225,7 +225,7 @@ export async function startServer() {
       throw new Error('Production startup refused: Judge0 is unavailable, unsandboxed, or missing Python/C/C++/Java.');
     }
     await app.listen({ port: PORT, host: HOST });
-    console.log(`L_Platform Backend running on http://${HOST}:${PORT}`);
+    console.log(`PLATFORM Backend running on http://${HOST}:${PORT}`);
     console.log(`OpenAPI documentation: http://${HOST}:${PORT}/docs`);
   } catch (err) {
     app.log.error(err);

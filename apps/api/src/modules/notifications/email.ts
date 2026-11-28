@@ -46,7 +46,7 @@ export async function sendEmail(tx: Tx, mail: OutgoingEmail): Promise<boolean> {
     return true;
   }
   try {
-    await smtp().sendMail({ from: process.env.EMAIL_FROM || 'L_Platform <no-reply@localhost>', to: mail.to, subject: mail.subject, text: mail.text });
+    await smtp().sendMail({ from: process.env.EMAIL_FROM || 'PLATFORM <no-reply@localhost>', to: mail.to, subject: mail.subject, text: mail.text });
     await tx.query(
       `INSERT INTO email_outbox (to_email, subject, body, template, status, provider, sent_at) VALUES ($1,$2,'[redacted]',$3,'SENT','smtp',NOW())`,
       [mail.to, mail.subject, mail.template],

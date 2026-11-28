@@ -32,7 +32,7 @@ The desktop signs in with Supabase Auth (email OTP) when `VITE_OFFLINE_FIRST=1`.
 ## Tasks
 1. **Secrets abstraction (`secrets.rs`):**
    - A trait `SecretStore { get, set, delete }`, with a keyring implementation (Windows; on other OSes it returns `IO: secure storage unavailable`) and an in-memory implementation used only under `cfg(test)`.
-   - Move nothing that exists. Only add new uses: the device private key (`lplatform/device-key`), and later the phase 10 assessment keys.
+   - Move nothing that exists. Only add new uses: the device private key (`platform/device-key`), and later the phase 10 assessment keys.
 2. **Device (`device.rs`):**
    - On first use, generate `deviceId` (UUID v4) and an Ed25519 key pair. The private seed goes to `SecretStore`; the `device_id` and `public_key` go to the C7 `device` row with `monotonic_seq = 0`.
    - `next_seq()` increments and persists **in the same SQLite transaction** as the row that uses it, so it never repeats after a crash.
@@ -111,9 +111,9 @@ The desktop signs in with Supabase Auth (email OTP) when `VITE_OFFLINE_FIRST=1`.
 ## Verification
 ```
 cargo +stable test --manifest-path apps/student-desktop/Cargo.toml
-pnpm --filter @lplatform/student-desktop test
-$env:VITE_OFFLINE_FIRST='1'; pnpm --filter @lplatform/student-desktop build
-pnpm --filter @lplatform/student-desktop build
+pnpm --filter @platform/student-desktop test
+$env:VITE_OFFLINE_FIRST='1'; pnpm --filter @platform/student-desktop build
+pnpm --filter @platform/student-desktop build
 ```
 Plus master §7.
 

@@ -397,8 +397,8 @@ CREATE TABLE IF NOT EXISTS audit_logs (
 
 CREATE TABLE IF NOT EXISTS platform_settings (
   id TEXT PRIMARY KEY DEFAULT 'default',
-  platform_name TEXT NOT NULL DEFAULT 'L_Platform',
-  support_email TEXT DEFAULT 'support@lplatform.dev',
+  platform_name TEXT NOT NULL DEFAULT 'PLATFORM',
+  support_email TEXT DEFAULT 'support@platform.dev',
   allowed_domains JSONB DEFAULT '["*"]'::jsonb,
   session_timeout_minutes INTEGER DEFAULT 1440,
   max_file_upload_mb INTEGER DEFAULT 10,

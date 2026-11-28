@@ -29,7 +29,7 @@ export function LoginScreen() {
           <span className="brand-mark" aria-hidden="true">
             L
           </span>
-          <span>L_Platform</span>
+          <span>PLATFORM</span>
         </div>
         <div>
           <h1>Sign in</h1>

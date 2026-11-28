@@ -165,7 +165,7 @@ const ORG_ADMIN_NAMES = [
 const PLATFORM_ADMIN = {
   firstName: "Aarav",
   lastName: "Mehta",
-  email: "admin@lplatform.dev",
+  email: "admin@platform.dev",
   jobTitle: "Platform Administrator",
 };
 
@@ -1092,7 +1092,7 @@ export function seedDatabase(): MockDatabase {
   auditLogs.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 
   const settings: PlatformSettings = {
-    platformName: "L_Platform",
+    platformName: "PLATFORM",
     timezone: "Asia/Kolkata",
     dateFormat: "DD/MM/YYYY",
     theme: "system",

@@ -23,7 +23,7 @@ Executed from this repository after the changes:
 - `pnpm build` — PASS (TypeScript + Vite production build).
 - `pnpm tauri build --bundles nsis` — PASS, x64 NSIS bundle produced.
 
-Installer: `target/release/bundle/nsis/L_Platform Student_0.1.0_x64-setup.exe` (2.26 MiB), SHA-256 `F87DED87C80D4DF0E0DE25AD850FA781F7EE3845CF207DB4A7601BE9A5B2BD15`. The artifact is unsigned and was not installed after this build.
+Installer: `target/release/bundle/nsis/PLATFORM Student_0.1.0_x64-setup.exe` (2.26 MiB), SHA-256 `F87DED87C80D4DF0E0DE25AD850FA781F7EE3845CF207DB4A7601BE9A5B2BD15`. The artifact is unsigned and was not installed after this build.
 
 The computer-use inspection observed the existing installed app at its sign-in screen at 800 × 600. No sign-in was performed. Therefore the authenticated redesigned screens were not visually verified at 1920 × 1080, 1536 × 864, 1366 × 768 or 1024 px. The final bundle was compiled successfully, but not launched or end-to-end-smoke-tested.
 

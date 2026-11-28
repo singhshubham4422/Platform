@@ -21,12 +21,12 @@ All of it is tested on the local PostgreSQL cluster with a stub of Supabase's `a
 - `docs/security/security-review.md`.
 
 ## Allowed paths
-- Create `supabase/config.toml` (project id placeholder `lplatform`; auth: email OTP enabled, `enable_signup = false`, OTP expiry 600 s; SMTP left commented with `# configured in dashboard: Brevo`).
+- Create `supabase/config.toml` (project id placeholder `platform`; auth: email OTP enabled, `enable_signup = false`, OTP expiry 600 s; SMTP left commented with `# configured in dashboard: Brevo`).
 - Create `supabase/migrations/20261124000001_core.sql`, `…0002_content.sql`, `…0003_work.sql`, `…0004_kpi.sql`, `…0005_rls.sql`.
 - Create `supabase/scripts/bootstrap-owner.mjs`.
 - Create `supabase/README.md`.
-- Create `packages/supabase-tests/**` (package `@lplatform/supabase-tests`, dev dependency `pg` 8, `node --test`).
-- Modify `scripts/local-postgres.mjs`: **add** a `supabase-test` command that creates the database `lplatform_supabase_test`, applies `supabase/tests-support/auth-stub.sql` and then all `supabase/migrations/*.sql` in name order, and runs `pnpm --filter @lplatform/supabase-tests test` with `SUPABASE_TEST_DATABASE_URL` set. Existing commands must behave exactly as before.
+- Create `packages/supabase-tests/**` (package `@platform/supabase-tests`, dev dependency `pg` 8, `node --test`).
+- Modify `scripts/local-postgres.mjs`: **add** a `supabase-test` command that creates the database `platform_supabase_test`, applies `supabase/tests-support/auth-stub.sql` and then all `supabase/migrations/*.sql` in name order, and runs `pnpm --filter @platform/supabase-tests test` with `SUPABASE_TEST_DATABASE_URL` set. Existing commands must behave exactly as before.
 - Create `supabase/tests-support/auth-stub.sql`.
 - Modify root `package.json`: add the script `"test:supabase": "node scripts/local-postgres.mjs supabase-test"`.
 - Create `docs/codex/offline-first/reports/06-report.md`.

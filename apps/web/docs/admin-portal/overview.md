@@ -1,6 +1,6 @@
 # Admin portal overview
 
-The admin portal is the L_Platform operator surface for onboarding schools, managing people,
+The admin portal is the PLATFORM operator surface for onboarding schools, managing people,
 building academic structure, publishing courses and allocating them to organizations. It runs
 entirely in the browser against a deterministic mock data layer.
 

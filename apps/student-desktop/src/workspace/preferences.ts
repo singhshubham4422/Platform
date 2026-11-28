@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { LanguageId } from '@lplatform/language-config';
+import type { LanguageId } from '@platform/language-config';
 
 export interface EditorPreferences {
   fontSize: number;

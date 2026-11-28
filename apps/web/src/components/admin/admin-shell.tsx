@@ -25,7 +25,7 @@ function Brand({ collapsed = false }: { collapsed?: boolean }) {
       {!collapsed && (
         <span className="min-w-0">
           <span className="text-sidebar-foreground block truncate text-sm font-bold tracking-tight">
-            L Platform
+            PLATFORM
           </span>
           <span className="text-sidebar-muted block text-[11px] font-medium">Admin Portal</span>
         </span>
@@ -154,7 +154,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           {children}
         </main>
         <footer className="page-container pt-2 pb-6">
-          <p className="text-muted-foreground text-xs">L Platform · Admin console</p>
+          <p className="text-muted-foreground text-xs">PLATFORM · Admin console</p>
         </footer>
       </div>
     </div>

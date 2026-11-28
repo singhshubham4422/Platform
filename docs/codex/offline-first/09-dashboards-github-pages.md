@@ -19,8 +19,8 @@ A static single-page web app, deployable to GitHub Pages or Cloudflare Pages, th
 - `apps/web/src/app/globals.css` (or the Tailwind theme): the brand colours and spacing, to match the look.
 
 ## Allowed paths
-- Create `apps/dashboard/**` (package `@lplatform/dashboard`, Vite + React 19 + TypeScript strict).
-  - Dependencies: `@supabase/supabase-js` 2, `react-router-dom` 7 (**HashRouter** only), `recharts` 2, `@lplatform/language-config`.
+- Create `apps/dashboard/**` (package `@platform/dashboard`, Vite + React 19 + TypeScript strict).
+  - Dependencies: `@supabase/supabase-js` 2, `react-router-dom` 7 (**HashRouter** only), `recharts` 2, `@platform/language-config`.
   - Dev dependencies: `vite`, `@vitejs/plugin-react`, `typescript`, `vitest`, `@testing-library/react`, `@testing-library/user-event`, `jsdom`, `@playwright/test`, at the versions already used in the repo where they exist.
 - Create `.github/workflows/dashboard-pages.yml`.
 - Modify `pnpm-lock.yaml`.
@@ -77,7 +77,7 @@ A static single-page web app, deployable to GitHub Pages or Cloudflare Pages, th
   - The publish-pack 409 message is shown.
   - The student submission detail renders no hidden-test fields even when the mock wrongly includes them. Defence in depth: the component must ignore those fields.
   - The "Not configured" screen.
-- **Build test:** `pnpm --filter @lplatform/dashboard build` succeeds, and the `dist/` grep for service keys passes.
+- **Build test:** `pnpm --filter @platform/dashboard build` succeeds, and the `dist/` grep for service keys passes.
 - **Playwright** (`apps/dashboard/e2e/`): against `vite preview` with a **mock data source** selected by `VITE_DATA_SOURCE=mock`, which only exists in a test build mode.
   - Every role's main pages at 1280×800 and 390×844, in light and dark.
   - No horizontal overflow, and no console errors.
@@ -87,9 +87,9 @@ A static single-page web app, deployable to GitHub Pages or Cloudflare Pages, th
 
 ## Verification
 ```
-pnpm --filter @lplatform/dashboard test
-pnpm --filter @lplatform/dashboard build
-pnpm --filter @lplatform/dashboard exec playwright test
+pnpm --filter @platform/dashboard test
+pnpm --filter @platform/dashboard build
+pnpm --filter @platform/dashboard exec playwright test
 ```
 Plus master §7.
 

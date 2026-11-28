@@ -1,6 +1,6 @@
 // Editor-independent completion data for the four judge languages. The Monaco workspace turns
 // these into completion items; keeping the data plain makes it testable without a DOM.
-import type { LanguageId } from '@lplatform/language-config';
+import type { LanguageId } from '@platform/language-config';
 
 export type CompletionKind = 'function' | 'keyword' | 'snippet' | 'property' | 'class';
 

@@ -26,7 +26,7 @@ export async function applySessionRlsVars(
   useRestrictedRole = true,
 ): Promise<void> {
   if (useRestrictedRole && ctx.systemContext !== 'SUPERUSER') {
-    await client.query('SET LOCAL ROLE lplatform_app');
+    await client.query('SET LOCAL ROLE platform_app');
   }
   await client.query(
     `SELECT

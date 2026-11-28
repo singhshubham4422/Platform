@@ -51,8 +51,8 @@ const ROUTES: Record<Role, Array<{ path: string; expect: RegExp }>> = {
 async function open(page: Page, role: Role, path: string, theme: 'light' | 'dark') {
   await page.addInitScript(
     ([email, storedTheme]) => {
-      window.localStorage.setItem('lplatform.mock.session', String(email));
-      window.localStorage.setItem('lplatform.dashboard.theme', String(storedTheme));
+      window.localStorage.setItem('platform.mock.session', String(email));
+      window.localStorage.setItem('platform.dashboard.theme', String(storedTheme));
     },
     [EMAIL[role], theme],
   );

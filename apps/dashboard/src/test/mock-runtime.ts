@@ -5,8 +5,8 @@ import type { Runtime } from '../runtime';
 import { createMockSource } from './mock-source';
 import { profiles } from './mock-data';
 
-export const MOCK_SESSION_KEY = 'lplatform.mock.session';
-export const MOCK_SCENARIO_KEY = 'lplatform.mock.scenario';
+export const MOCK_SESSION_KEY = 'platform.mock.session';
+export const MOCK_SCENARIO_KEY = 'platform.mock.scenario';
 export const MOCK_CODE = '123456';
 
 function mockAuth(): AuthService {

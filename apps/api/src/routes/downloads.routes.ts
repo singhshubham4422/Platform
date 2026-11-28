@@ -62,7 +62,7 @@ function config() {
 function headers(token: string, accept = 'application/vnd.github+json'): Record<string, string> {
   const h: Record<string, string> = {
     Accept: accept,
-    'User-Agent': 'l-platform-downloads',
+    'User-Agent': 'platform-downloads',
     'X-GitHub-Api-Version': '2022-11-28',
   };
   if (token) h.Authorization = `Bearer ${token}`;

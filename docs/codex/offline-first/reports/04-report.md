@@ -16,9 +16,9 @@ Status: **Incomplete**. Pack installation, local pack reads, C6 query/run comman
 
 - `cargo +stable test --manifest-path apps/student-desktop/Cargo.toml packs` — 2 passed (path safety and repeatable migration).
 - `cargo +stable clippy --manifest-path apps/student-desktop/Cargo.toml --all-targets -- -D warnings` — succeeded.
-- `pnpm --filter @lplatform/student-desktop test` — 10 files, 32 passed.
-- `pnpm --filter @lplatform/student-desktop typecheck` — succeeded.
-- `pnpm --filter @lplatform/student-desktop build` — succeeded; existing Monaco bundle size warning remains.
+- `pnpm --filter @platform/student-desktop test` — 10 files, 32 passed.
+- `pnpm --filter @platform/student-desktop typecheck` — succeeded.
+- `pnpm --filter @platform/student-desktop build` — succeeded; existing Monaco bundle size warning remains.
 
 Not verified: signed pack installation/re-install/upgrade, tamper-on-disk rejection, hidden-data serialization, `run_question` RUN/SUBMIT counts, assessment submit behavior, and the manual offline UI journey. Those end-to-end pack tests require adding a test-only injected key path and fixture pack builder; no real runtime pack is installed under `.local/runtimes-test`.
 

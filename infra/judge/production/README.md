@@ -36,15 +36,15 @@ Containers on `judge-private` (workers, database, Redis) have no external route.
 ## Install
 
 ```bash
-sudo mkdir -p /opt/lplatform-judge && sudo cp -r infra/judge/. /opt/lplatform-judge/   # Dockerfile + production/
-cd /opt/lplatform-judge/production
+sudo mkdir -p /opt/platform-judge && sudo cp -r infra/judge/. /opt/platform-judge/   # Dockerfile + production/
+cd /opt/platform-judge/production
 cp judge0.conf.example judge0.conf          # replace every <…> with openssl rand -hex 32 output
 cp judge0.conf judge0.env && chmod 600 judge0.conf judge0.env
 export JUDGE0_BIND_ADDR=<vm-private-ip>
 docker compose up -d --build --wait
 ```
 
-On the **API host**, set `JUDGE_PROVIDER=judge0`, `JUDGE0_URL=http://<vm-private-ip>:2358` (or the TLS URL) and `JUDGE0_AUTH_TOKEN=<AUTHN_TOKEN>`. Never give the API `AUTHZ_TOKEN`, the Judge0 database password or the Redis password. Run the platform judge worker (`pnpm --filter @lplatform/api judge:worker:start`) on the API side. It holds the platform database credentials, never the Judge0 VM.
+On the **API host**, set `JUDGE_PROVIDER=judge0`, `JUDGE0_URL=http://<vm-private-ip>:2358` (or the TLS URL) and `JUDGE0_AUTH_TOKEN=<AUTHN_TOKEN>`. Never give the API `AUTHZ_TOKEN`, the Judge0 database password or the Redis password. Run the platform judge worker (`pnpm --filter @platform/api judge:worker:start`) on the API side. It holds the platform database credentials, never the Judge0 VM.
 
 ## Acceptance (required before enabling execution)
 

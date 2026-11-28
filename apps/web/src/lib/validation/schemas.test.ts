@@ -53,7 +53,7 @@ describe("invitationInputSchema", () => {
 
 describe("settingsSchema", () => {
   const base = {
-    platformName: "L_Platform",
+    platformName: "PLATFORM",
     timezone: "Asia/Kolkata",
     dateFormat: "DD/MM/YYYY" as const,
     theme: "system" as const,
@@ -66,7 +66,7 @@ describe("settingsSchema", () => {
     adminProfile: {
       firstName: "Asha",
       lastName: "Verma",
-      email: "asha@lplatform.dev",
+      email: "asha@platform.dev",
       jobTitle: "Platform lead",
     },
     sessionPreferences: {

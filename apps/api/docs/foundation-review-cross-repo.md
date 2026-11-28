@@ -1,4 +1,4 @@
-# L_Platform foundation review — combined report
+# PLATFORM foundation review — combined report
 
 Review date: 2026-11-09. Covers the open foundation PRs in Web #1, Backend #1 and Application #1. None is merged. No repository visibility was changed and no product development was started.
 

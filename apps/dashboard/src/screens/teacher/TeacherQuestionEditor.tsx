@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import type { LanguageId } from '@lplatform/language-config';
+import type { LanguageId } from '@platform/language-config';
 import type { Question, QuestionTest } from '../../data/types';
 import { useDataSource } from '../../data/DataProvider';
 import { useAsync } from '../../lib/use-async';

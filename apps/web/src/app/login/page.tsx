@@ -89,7 +89,7 @@ function LoginForm() {
           <span className="bg-primary text-primary-foreground flex size-9 items-center justify-center rounded-md text-sm font-bold">
             LP
           </span>
-          <span className="text-lg font-semibold text-white">L Platform</span>
+          <span className="text-lg font-semibold text-white">PLATFORM</span>
         </div>
         <div className="max-w-md space-y-8">
           <div className="space-y-3">
@@ -112,7 +112,7 @@ function LoginForm() {
           </ul>
         </div>
         <p className="text-sidebar-muted text-xs">
-          Students sign in with the L Platform desktop app.
+          Students sign in with the PLATFORM desktop app.
         </p>
       </aside>
 
@@ -122,7 +122,7 @@ function LoginForm() {
             <span className="bg-primary text-primary-foreground flex size-8 items-center justify-center rounded-md text-xs font-bold">
               LP
             </span>
-            <span className="font-semibold">L Platform</span>
+            <span className="font-semibold">PLATFORM</span>
           </div>
           <div className="mb-6 space-y-1.5">
             <h2 className="text-2xl font-semibold tracking-tight">Sign in</h2>

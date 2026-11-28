@@ -4,8 +4,8 @@ Status: **Incomplete**. The five C9 migrations, OTP project config, test-only au
 
 ## Verification
 
-- `pnpm test:supabase` — schema and migrations applied in a fresh local `lplatform_supabase_test`; 4 Node tests passed. The command drops only the test database it created, including on failure. It refuses to reset a pre-existing database of that name.
-- `pnpm test:integration` — run with `LOCAL_PG_PORT=54331` and `LOCAL_PG_DATA_DIR=.local/postgres/offline-phase06` to preserve the pre-existing `lplatform_test` database. Result: 3 integration files, 24 tests passed. The dedicated cluster was stopped after the run and its ignored files remain under `.local`.
+- `pnpm test:supabase` — schema and migrations applied in a fresh local `platform_supabase_test`; 4 Node tests passed. The command drops only the test database it created, including on failure. It refuses to reset a pre-existing database of that name.
+- `pnpm test:integration` — run with `LOCAL_PG_PORT=54331` and `LOCAL_PG_DATA_DIR=.local/postgres/offline-phase06` to preserve the pre-existing `platform_test` database. Result: 3 integration files, 24 tests passed. The dedicated cluster was stopped after the run and its ignored files remain under `.local`.
 - Existing Node output includes the repository's Windows `shell: true` child-process deprecation warning for invoking `pnpm.cmd`.
 
 ## Schema

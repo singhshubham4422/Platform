@@ -2,7 +2,7 @@
 
 Status labels reflect evidence in the workspace as of 2026-11-20. “Working” means code and a relevant test or integration path were found; it does not imply production deployment validation.
 
-| Capability | L_Platform evidence/status | J_Platform evidence/status | Target reuse/mapping |
+| Capability | PLATFORM evidence/status | J_Platform evidence/status | Target reuse/mapping |
 |---|---|---|---|
 | Organization and user records | Backend schema/routes/tests: working, incompletely production-verified | Admin institute UI/data adapter only; no server | L backend is academic source of truth; map J institute IDs only after restoring its DB |
 | Roles and auth | L backend auth, refresh rotation, guards: working and unit-tested; role model limited | Supabase client dependency and README claims; source absent | Preserve L IDs/sessions; migrate memberships additively |

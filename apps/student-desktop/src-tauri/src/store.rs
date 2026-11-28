@@ -1,7 +1,7 @@
 //! Local SQLite store for the student workspace.
 //!
 //! Holds drafts, the sync outbox, notes, course-package metadata and sync cursors in
-//! `<app data dir>/lplatform.db`. Authentication secrets are NOT stored here (they live in the
+//! `<app data dir>/platform.db`. Authentication secrets are NOT stored here (they live in the
 //! OS credential vault). The server stays authoritative for grades and submission status.
 use rusqlite::{Connection, OptionalExtension, Transaction, params};
 use serde::{Deserialize, Serialize};

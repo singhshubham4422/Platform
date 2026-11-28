@@ -1,4 +1,4 @@
-# L Platform — Backend API
+# PLATFORM — Backend API
 
 Fastify + TypeScript + Drizzle API on PostgreSQL (Supabase in production). Serves the web portal (admins, organization admins, teachers) and the student desktop app.
 
@@ -15,7 +15,7 @@ Fastify + TypeScript + Drizzle API on PostgreSQL (Supabase in production). Serve
 Two layers, both required:
 
 1. **Route guards** — `authenticate` + `requireRole(...)` and per-resource checks (same organization, teacher-of-section, own records).
-2. **PostgreSQL row-level security** — every table has RLS `FORCE`d. Each request runs in a transaction that does `SET LOCAL ROLE lplatform_app` (no `BYPASSRLS`) and sets `app.user_id`, `app.user_role`, `app.organization_id`, so the database itself blocks cross-tenant reads/writes.
+2. **PostgreSQL row-level security** — every table has RLS `FORCE`d. Each request runs in a transaction that does `SET LOCAL ROLE platform_app` (no `BYPASSRLS`) and sets `app.user_id`, `app.user_role`, `app.organization_id`, so the database itself blocks cross-tenant reads/writes.
 
 `src/tests/integration/security-rls.test.ts` covers tenant isolation, privilege escalation, developer PII isolation, roster privacy and the teacher/student workflows.
 

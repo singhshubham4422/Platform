@@ -2,14 +2,14 @@
 
 ## Architecture
 
-L_Platform Web is the frontend for a private education platform. It currently ships the admin
+PLATFORM Web is the frontend for a private education platform. It currently ships the admin
 portal; the teacher portal is planned. Stack: Next.js App Router, React, strict TypeScript,
 Tailwind CSS, shadcn/ui-style Radix components, Zod, React Hook Form, TanStack Query/Table,
 Recharts, Lucide and pnpm.
 
 All data access goes through the service contracts in `src/lib/api/contracts.ts`. The active
 implementation is the mock adapter in `src/lib/mock/services`, persisted in localStorage under
-`lplatform.mock.database`. UI code and hooks must import `services` from `src/lib/api`, never a mock
+`platform.mock.database`. UI code and hooks must import `services` from `src/lib/api`, never a mock
 module directly, so the adapter can be replaced by generated API clients without touching screens.
 
 The backend owns API contracts, authorization and organization isolation. Never add Next.js route

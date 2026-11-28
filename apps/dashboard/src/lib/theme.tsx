@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 
 type Theme = 'light' | 'dark';
-const KEY = 'lplatform.dashboard.theme';
+const KEY = 'platform.dashboard.theme';
 
 function initialTheme(): Theme {
   const stored = typeof localStorage !== 'undefined' ? localStorage.getItem(KEY) : null;

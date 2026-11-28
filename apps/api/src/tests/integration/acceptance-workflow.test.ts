@@ -84,7 +84,7 @@ describe('Unified platform acceptance workflow', () => {
   });
 
   it('platform owner creates a college and invites its administrator', async () => {
-    tokens.owner = await login('admin@lplatform.dev', 'Admin@123');
+    tokens.owner = await login('admin@platform.dev', 'Admin@123');
     const org = await call('POST', '/api/organizations', auth(tokens.owner), {
       name: `Acceptance Institute ${tag}`, slug: `acceptance-${tag}`, type: 'COLLEGE', contactName: 'Registrar', contactEmail: `registrar@college-${tag}.test`, city: 'Pune', country: 'India',
     }, 201);

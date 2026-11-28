@@ -29,7 +29,7 @@ The student picks a language, and the desktop app installs a ready-to-use toolch
 
 ## Tasks
 1. **Keys (`keys.rs`):** load the release public key as in C2.
-   - Order: `option_env!("LPLATFORM_RELEASE_PUBKEY")`; then, **only** under `cfg(debug_assertions)` or `cfg(test)`, `{repo}/.local/keys/release.pub` found by walking up from `CARGO_MANIFEST_DIR`.
+   - Order: `option_env!("PLATFORM_RELEASE_PUBKEY")`; then, **only** under `cfg(debug_assertions)` or `cfg(test)`, `{repo}/.local/keys/release.pub` found by walking up from `CARGO_MANIFEST_DIR`.
    - If neither is available, return `Err("PACK_KEY_NOT_CONFIGURED: release")`.
    - Expose `verify_detached(bytes, sig_b64, pubkey_b64) -> bool` (ed25519-dalek, strict verification).
 2. **Index (`index.rs`):**
@@ -61,7 +61,7 @@ The student picks a language, and the desktop app installs a ready-to-use toolch
    - **Concurrency:** only one install at a time per language (a mutex in state). A second call returns the error `IO: install already running`.
 5. **Commands (C6):** `runtimes_list`, `runtimes_available(baseUrl)`, `runtimes_install(baseUrl, language)` (async; runs off the main thread), `runtimes_remove(language, version)` (deletes the folder, then the row).
    - Expose a Rust function `runtimes::resolve(language) -> Result<ResolvedRuntime, String>` returning the newest installed runtime with its index templates, so phase 03 can use it. If none is installed, return `RUNTIME_NOT_INSTALLED: <LANG>`.
-   - Store the templates in the DB row or alongside it as `{version}/.lplatform-runtime.json`; your choice, but document it.
+   - Store the templates in the DB row or alongside it as `{version}/.platform-runtime.json`; your choice, but document it.
 6. **Base URL rules:** `baseUrl` must start with `https://` and end with `/`. `http://localhost` and `http://127.0.0.1` are allowed only in debug builds, for tests. Anything else gives `NETWORK: invalid base url`.
 7. **TypeScript wrapper (`src/lib/runtimes.ts`):**
    - Typed functions for the four commands, plus `onInstallProgress(cb) → unlisten`.
@@ -96,9 +96,9 @@ The student picks a language, and the desktop app installs a ready-to-use toolch
 ## Verification
 ```
 cargo +stable test --manifest-path apps/student-desktop/Cargo.toml runtimes
-pnpm --filter @lplatform/student-desktop test
+pnpm --filter @platform/student-desktop test
 ```
-Plus master §7. **Optional, manual:** build a real Windows Python embeddable pack with phase 01 `lang-pack`, serve `.local/` with `npx http-server .local -p 8787` in debug, and install it through `RuntimeManager` in `pnpm --filter @lplatform/student-desktop tauri dev`. Record it if done, else mark it **Implemented, not verified**.
+Plus master §7. **Optional, manual:** build a real Windows Python embeddable pack with phase 01 `lang-pack`, serve `.local/` with `npx http-server .local -p 8787` in debug, and install it through `RuntimeManager` in `pnpm --filter @platform/student-desktop tauri dev`. Record it if done, else mark it **Implemented, not verified**.
 
 ## Must not
 - No `cmd /c`, `sh -c` or PowerShell to run anything.

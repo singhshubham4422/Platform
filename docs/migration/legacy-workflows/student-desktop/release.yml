@@ -124,6 +124,6 @@ jobs:
           gh release create "$TAG" release-artifacts/* \
             --repo "$GITHUB_REPOSITORY" \
             --target "$GITHUB_SHA" \
-            --title "L Platform Student ${TAG#app-}" \
+            --title "PLATFORM Student ${TAG#app-}" \
             --generate-notes \
             --latest

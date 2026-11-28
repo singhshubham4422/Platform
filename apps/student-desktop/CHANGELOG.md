@@ -18,7 +18,7 @@
 
 ## 0.2.1 — 2026-11-13
 
-- Installers connect to the live API (https://l-platform-backend.vercel.app) by default.
+- Installers connect to the live API (https://platform-backend.vercel.app) by default.
 
 ## 0.2.0 — 2026-11-12
 

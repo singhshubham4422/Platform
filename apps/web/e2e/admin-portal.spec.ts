@@ -11,7 +11,7 @@ test.describe("backend authentication boundary", () => {
   test("rejects invalid credentials", async ({ page }) => {
     await page.goto("/login");
 
-    await page.getByLabel("Email Address").fill("admin@lplatform.dev");
+    await page.getByLabel("Email Address").fill("admin@platform.dev");
     await page.getByLabel("Password", { exact: true }).fill("not-the-password");
     await page.getByRole("button", { name: "Sign In" }).click();
 
@@ -36,7 +36,7 @@ test.describe("admin portal golden path", () => {
 
     await test.step("sign in as platform owner", async () => {
       await page.goto("/login");
-      await page.getByLabel("Email Address").fill("admin@lplatform.dev");
+      await page.getByLabel("Email Address").fill("admin@platform.dev");
       await page.getByLabel("Password", { exact: true }).fill("Admin@123");
       await page.getByRole("button", { name: "Sign In" }).click();
 
@@ -224,7 +224,7 @@ test.describe("admin portal golden path", () => {
       await page.goto("/admin/settings");
       await expect(page.getByRole("heading", { name: "Settings" })).toBeVisible();
 
-      await page.getByLabel("Platform name").fill(`L_Platform ${suffix}`);
+      await page.getByLabel("Platform name").fill(`PLATFORM ${suffix}`);
       await page.getByRole("button", { name: "Save settings" }).click();
       await expect(page.getByText("Settings saved.")).toBeVisible();
 

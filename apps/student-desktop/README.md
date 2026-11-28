@@ -1,4 +1,4 @@
-# L Platform — Student App
+# PLATFORM — Student App
 
 Windows desktop app for students (Tauri 2 + React + TypeScript). Students sign in, take the **AI Explorers** course, solve coding assignments, take tests and see results.
 

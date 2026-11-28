@@ -28,6 +28,9 @@ pub struct ResolvedRuntime {
     pub source_file: String,
     pub compile: Option<Vec<String>>,
     pub run: Vec<String>,
+    /// Extra environment for compile and run (already expanded).
+    #[serde(default)]
+    pub env: Vec<(String, String)>,
 }
 
 pub async fn install(
@@ -142,9 +145,10 @@ where
             source_file: entry.source_file.clone(),
             compile: entry.compile.clone(),
             run: entry.run.clone(),
+            env: Vec::new(),
         };
         if let Err(e) = fs::write(
-            final_path.join(".lplatform-runtime.json"),
+            final_path.join(".platform-runtime.json"),
             serde_json::to_vec(&templates).map_err(|e| format!("IO: {e}"))?,
         ) {
             let _ = fs::remove_dir_all(&final_path);
@@ -236,9 +240,13 @@ pub fn resolve(
     let lang = language.to_ascii_uppercase();
     let mut rows = rows_for_language(store, &lang)?;
     rows.sort_by(|a, b| b.installed_at.cmp(&a.installed_at));
-    let row = rows
-        .first()
-        .ok_or_else(|| format!("RUNTIME_NOT_INSTALLED: {lang}"))?;
+    let Some(row) = rows.first() else {
+        return manager
+            .bundled
+            .as_deref()
+            .and_then(|root| super::bundled::resolve(root, &manager.cache_dir(), &lang))
+            .ok_or_else(|| format!("RUNTIME_NOT_INSTALLED: {lang}"));
+    };
     let path = PathBuf::from(&row.path);
     if !safe_version(&row.version)
         || path != manager.root.join("runtimes").join(&lang).join(&row.version)
@@ -246,7 +254,7 @@ pub fn resolve(
         return Err("IO: runtime path outside app data".into());
     }
     serde_json::from_slice(
-        &fs::read(path.join(".lplatform-runtime.json")).map_err(|e| format!("IO: {e}"))?,
+        &fs::read(path.join(".platform-runtime.json")).map_err(|e| format!("IO: {e}"))?,
     )
     .map_err(|e| format!("IO: invalid runtime metadata: {e}"))
 }

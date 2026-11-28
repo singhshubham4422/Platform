@@ -623,8 +623,8 @@ export const auditLogs = pgTable('audit_logs', {
 // Platform Settings
 export const platformSettings = pgTable('platform_settings', {
   id: text('id').primaryKey().default('default'),
-  platformName: text('platform_name').notNull().default('L_Platform'),
-  supportEmail: text('support_email').default('support@lplatform.dev'),
+  platformName: text('platform_name').notNull().default('PLATFORM'),
+  supportEmail: text('support_email').default('support@platform.dev'),
   allowedDomains: jsonb('allowed_domains').default(['*']),
   sessionTimeoutMinutes: integer('session_timeout_minutes').default(1440),
   maxFileUploadMb: integer('max_file_upload_mb').default(10),

@@ -192,7 +192,7 @@ export default function OrganizationsPage() {
       <PageHeader
         eyebrow="Organization management"
         title="Organizations"
-        description="Manage schools and educational institutions across L_Platform. Select an organization to inspect its people, classes, and allocations."
+        description="Manage schools and educational institutions across PLATFORM. Select an organization to inspect its people, classes, and allocations."
         actions={
           <>
             <Button variant="outline" onClick={() => void handleExport()} disabled={exporting}>

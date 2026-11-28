@@ -100,7 +100,7 @@ export const JoinClassModal: React.FC<JoinClassModalProps> = ({
               className="input-control"
               value={code}
               onChange={(e) => setCode(e.target.value)}
-              placeholder="e.g. CLS-SEC-10A or https://lplatform.local/join?code=..."
+              placeholder="e.g. CLS-SEC-10A or https://platform.local/join?code=..."
               required
               autoFocus
             />
@@ -384,7 +384,7 @@ export const LearningLibraryView: React.FC<LearningLibraryViewProps> = ({
         </span>
       </div>
 
-      <p>{course.description || 'Structured L_Platform course curriculum.'}</p>
+      <p>{course.description || 'Structured PLATFORM course curriculum.'}</p>
 
       <div className="course-card-footer">
         {course.accessEnabled ? (

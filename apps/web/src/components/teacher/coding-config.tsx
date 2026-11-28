@@ -1,6 +1,6 @@
 "use client";
 
-import { LANGUAGES, type LanguageId } from "@lplatform/language-config";
+import { LANGUAGES, type LanguageId } from "@platform/language-config";
 import * as React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";

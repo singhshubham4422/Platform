@@ -11,7 +11,7 @@ import type {
 } from "@/types";
 import { seedDatabase } from "./seed";
 
-export const MOCK_DB_KEY = "lplatform.mock.database";
+export const MOCK_DB_KEY = "platform.mock.database";
 export const MOCK_DB_VERSION = 2;
 
 export interface SectionStudentRecord {

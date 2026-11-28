@@ -18,8 +18,8 @@ Verified on Windows x64:
 - `cargo +stable build --manifest-path apps/student-desktop/Cargo.toml --examples` — succeeded.
 - `cargo +stable clippy --manifest-path apps/student-desktop/Cargo.toml --all-targets -- -D warnings` — succeeded.
 - `cargo +stable test --manifest-path apps/student-desktop/Cargo.toml` — 24 passed.
-- `pnpm --filter @lplatform/student-desktop exec vitest run src/lib/runner.test.ts` — 1 file, 2 passed.
-- `pnpm --filter @lplatform/student-desktop typecheck` — succeeded.
+- `pnpm --filter @platform/student-desktop exec vitest run src/lib/runner.test.ts` — 1 file, 2 passed.
+- `pnpm --filter @platform/student-desktop typecheck` — succeeded.
 
 The automated Rust tests currently cover comparison normalization, Java class naming and C6 serialization only. The requested CE/WA/RE/TLE/MLE/output-limit/fork-bomb/hidden redaction/environment/cleanup adversarial cases are **not yet tested**. No real language runtime is present under `.local/runtimes-test`, so the 10-run Python overhead measurement is unavailable.
 

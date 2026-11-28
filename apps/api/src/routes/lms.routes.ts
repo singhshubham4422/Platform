@@ -36,7 +36,7 @@ export function extractJoinCode(rawInput: string): string {
   try {
     if (trimmed.includes('://') || trimmed.includes('?')) {
       const parsed = new URL(
-        trimmed.startsWith('http') ? trimmed : `https://lplatform.local/${trimmed}`,
+        trimmed.startsWith('http') ? trimmed : `https://platform.local/${trimmed}`,
       );
       const param =
         parsed.searchParams.get('join') ||

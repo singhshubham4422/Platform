@@ -4,15 +4,15 @@ Status: **Implemented** locally. The `apps/dashboard` SPA builds, its unit tests
 
 ## Verification
 
-- `pnpm --filter @lplatform/dashboard test` — 2 files, 24 tests passed (login, role routing, disabled profiles, role homes with data and empty data, hidden-test round trip, publish 409, hidden-result defence, not-configured screen, production mock refusal).
-- `pnpm --filter @lplatform/dashboard build` — `tsc --noEmit`, Vite production build and `scripts/check-dist.mjs` passed; `dist/` has no `service_role`/`SERVICE_ROLE` string and no `mock-runtime` chunk.
-- `pnpm --filter @lplatform/dashboard exec playwright test` — 81 tests passed: every role's main pages at 1280×800 and 390×844 in light and dark, asserting no horizontal page overflow, no console/page errors, and writing screenshots to the gitignored `apps/dashboard/test-results/`.
-- `pnpm --filter @lplatform/dashboard lint` — application code does not import `src/test` modules (only `src/runtime.ts` may, behind the test-mode guard).
+- `pnpm --filter @platform/dashboard test` — 2 files, 24 tests passed (login, role routing, disabled profiles, role homes with data and empty data, hidden-test round trip, publish 409, hidden-result defence, not-configured screen, production mock refusal).
+- `pnpm --filter @platform/dashboard build` — `tsc --noEmit`, Vite production build and `scripts/check-dist.mjs` passed; `dist/` has no `service_role`/`SERVICE_ROLE` string and no `mock-runtime` chunk.
+- `pnpm --filter @platform/dashboard exec playwright test` — 81 tests passed: every role's main pages at 1280×800 and 390×844 in light and dark, asserting no horizontal page overflow, no console/page errors, and writing screenshots to the gitignored `apps/dashboard/test-results/`.
+- `pnpm --filter @platform/dashboard lint` — application code does not import `src/test` modules (only `src/runtime.ts` may, behind the test-mode guard).
 - `VITE_DATA_SOURCE=mock vite build` fails with “only allowed in the test build mode”.
 
 ## What was built
 
-`apps/dashboard` (`@lplatform/dashboard`): React 19 + TypeScript strict, Vite, HashRouter, recharts, `@supabase/supabase-js`, `@lplatform/language-config`; vitest + Testing Library and Playwright at the repository's existing versions. `pnpm-lock.yaml` was updated.
+`apps/dashboard` (`@platform/dashboard`): React 19 + TypeScript strict, Vite, HashRouter, recharts, `@supabase/supabase-js`, `@platform/language-config`; vitest + Testing Library and Playwright at the repository's existing versions. `pnpm-lock.yaml` was updated.
 
 - `src/runtime.ts` reads `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` and optional `VITE_FUNCTIONS_URL` (default `${VITE_SUPABASE_URL}/functions/v1`). Missing URL/key renders the full-page `NotConfiguredScreen`; there is no hard-coded fallback and no service key in the client.
 - `src/data/source.ts` defines one method per screen query/mutation; `supabase-source.ts` implements it with the anon client and bearer-authenticated calls to `invite-user`, `publish-pack` (course and, later, assessment).

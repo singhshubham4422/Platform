@@ -4,7 +4,7 @@ import type pg from 'pg';
  * Migration 002:
  * 1. Correct AI Readiness course access model (single platform-wide free course, no per-org triggers).
  * 2. Support platform-wide assessments without mandatory class/org enrollment + multi-type assignments.
- * 3. Provision least-privilege non-BYPASSRLS role `lplatform_app` and PostgreSQL Row-Level Security (RLS).
+ * 3. Provision least-privilege non-BYPASSRLS role `platform_app` and PostgreSQL Row-Level Security (RLS).
  */
 export async function applySecurityRlsAndPlatformContentMigration(
   client: pg.PoolClient | pg.Pool,
@@ -77,31 +77,31 @@ export async function applySecurityRlsAndPlatformContentMigration(
   await client.query(`
     DO $$
     BEGIN
-      IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'lplatform_app') THEN
-        CREATE ROLE lplatform_app NOLOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOBYPASSRLS;
+      IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'platform_app') THEN
+        CREATE ROLE platform_app NOLOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOBYPASSRLS;
       ELSIF EXISTS (
-        SELECT 1 FROM pg_roles WHERE rolname = 'lplatform_app'
+        SELECT 1 FROM pg_roles WHERE rolname = 'platform_app'
           AND (rolsuper OR rolcreatedb OR rolcreaterole OR rolbypassrls)
       ) THEN
         -- Only touch attributes when they are unsafe: re-running as a non-superuser migrator
-        -- (Supabase "postgres", local "lplatform") must stay idempotent.
-        ALTER ROLE lplatform_app NOSUPERUSER NOCREATEDB NOCREATEROLE NOBYPASSRLS;
+        -- (Supabase "postgres", local "platform") must stay idempotent.
+        ALTER ROLE platform_app NOSUPERUSER NOCREATEDB NOCREATEROLE NOBYPASSRLS;
       END IF;
     END $$;
 
     -- The API connects as the migration/login role (e.g. Supabase "postgres") and switches to
-    -- lplatform_app per request with SET LOCAL ROLE, which requires membership on PG16+.
+    -- platform_app per request with SET LOCAL ROLE, which requires membership on PG16+.
     DO $grant$
     BEGIN
-      EXECUTE format('GRANT lplatform_app TO %I', current_user);
+      EXECUTE format('GRANT platform_app TO %I', current_user);
     EXCEPTION WHEN others THEN
-      RAISE NOTICE 'Could not grant lplatform_app to %: %', current_user, SQLERRM;
+      RAISE NOTICE 'Could not grant platform_app to %: %', current_user, SQLERRM;
     END $grant$;
 
-    GRANT USAGE ON SCHEMA public TO lplatform_app;
-    GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO lplatform_app;
-    GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO lplatform_app;
-    ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO lplatform_app;
+    GRANT USAGE ON SCHEMA public TO platform_app;
+    GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO platform_app;
+    GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO platform_app;
+    ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO platform_app;
   `);
 
   // 4. Acyclic RLS helper functions (session GUC getters + SECURITY DEFINER membership helpers)
@@ -333,7 +333,7 @@ export async function applySecurityRlsAndPlatformContentMigration(
       );
     $$;
 
-    GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO lplatform_app;
+    GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO platform_app;
   `);
 
   // 5. Enable + FORCE RLS and create policies on every table

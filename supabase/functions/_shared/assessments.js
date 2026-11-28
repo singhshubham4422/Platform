@@ -82,7 +82,7 @@ export async function publishAssessment({ request, body, env, createClient, oci 
   const sig = await packFormat.signDetached(built.bytes, envOrThrow(env, 'PACK_SIGNING_KEY'));
   const objectPath = `packs/assessment/${assessmentId}/${version}.lpack`;
   try {
-    await oci.putObject({ objectName:objectPath, bytes:built.bytes, contentType:'application/vnd.lplatform.pack' });
+    await oci.putObject({ objectName:objectPath, bytes:built.bytes, contentType:'application/vnd.platform.pack' });
     await oci.putObject({ objectName:`${objectPath}.sig`, bytes:new TextEncoder().encode(sig), contentType:'text/plain' });
   } catch { console.error('publish-pack OCI upload failed; any partial object is an orphan', assessmentId, version); throw new Error('PACK_UPLOAD_FAILED'); }
   const inserted = await serviceClient.from('course_pack_versions').insert({

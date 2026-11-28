@@ -111,7 +111,7 @@ export function Landing() {
             <span className="bg-primary text-primary-foreground flex size-8 items-center justify-center rounded-md text-xs font-bold">
               LP
             </span>
-            L Platform
+            PLATFORM
           </Link>
           <nav className="text-sidebar-foreground/80 hidden gap-6 text-sm md:flex">
             <a href="#features" className="hover:text-white">
@@ -141,7 +141,7 @@ export function Landing() {
               Get AI-ready. Learn to code. Have fun doing it.
             </h1>
             <p className="text-sidebar-foreground/80 mt-5 max-w-xl text-lg">
-              L Platform is a free desktop app with a beginner AI course, hands-on coding challenges
+              PLATFORM is a free desktop app with a beginner AI course, hands-on coding challenges
               and tests from your teachers.
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-3">
@@ -224,7 +224,7 @@ export function Landing() {
 
         <section id="download" className="mx-auto max-w-6xl px-6 py-20 text-center">
           <Laptop className="text-primary mx-auto size-10" aria-hidden />
-          <h2 className="mt-4 text-3xl font-semibold">Download L Platform</h2>
+          <h2 className="mt-4 text-3xl font-semibold">Download PLATFORM</h2>
           <p className="text-muted-foreground mx-auto mt-2 max-w-xl">
             Free for students. Works on Windows 10/11, macOS 11+ and Linux.
           </p>
@@ -252,7 +252,7 @@ export function Landing() {
 
       <footer className="border-border text-muted-foreground border-t">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-6 py-6 text-sm">
-          <span>© {new Date().getFullYear()} L Platform</span>
+          <span>© {new Date().getFullYear()} PLATFORM</span>
           <Link href="/login" className="hover:text-foreground">
             School & teacher sign in
           </Link>

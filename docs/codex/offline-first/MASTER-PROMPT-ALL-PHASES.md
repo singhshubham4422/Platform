@@ -107,7 +107,7 @@ Two independent agents can run **Track A** (01 → 02 → 03 → 04) and **Track
 - Two key roles:
   - `release` signs language packs and `packs/lang/index.json`. Held offline by the owner.
   - `pack` signs course and assessment packs. Held as the secret `PACK_SIGNING_KEY` (base64 of the 32-byte seed) in the edge functions.
-- The desktop app gets the public keys at **compile time** from env vars `LPLATFORM_RELEASE_PUBKEY` and `LPLATFORM_PACK_PUBKEY` (`option_env!`).
+- The desktop app gets the public keys at **compile time** from env vars `PLATFORM_RELEASE_PUBKEY` and `PLATFORM_PACK_PUBKEY` (`option_env!`).
   - In debug builds and tests, if unset, it uses keys from `.local/keys/release.pub` and `.local/keys/pack.pub` when present.
   - In release builds, if unset, every install fails with the error `PACK_KEY_NOT_CONFIGURED`. There is no silent fallback.
 
@@ -409,10 +409,10 @@ Nothing else.
 
 ### Tasks
 1. **Package skeleton:** `packages/pack-format/package.json`.
-   - Name `@lplatform/pack-format`, `"type": "module"`, `exports` with `types` and `default`.
+   - Name `@platform/pack-format`, `"type": "module"`, `exports` with `types` and `default`.
    - Scripts: `test` (`node --test`), `lint` (`node --check` on every `.js`/`.mjs` file, matching the repo's lint style; see how other packages lint and keep it equivalent), `typecheck` (`tsc --noEmit -p tsconfig.json` with `allowJs`/`checkJs` over `index.d.ts` only, or omit if language-config has none and say so).
    - Dependency: `fflate` 0.8.x.
-   - The `bin` field maps `lplatform-pack` to `bin/pack-builder.mjs`.
+   - The `bin` field maps `platform-pack` to `bin/pack-builder.mjs`.
 2. **Crypto, using only Web Crypto (`globalThis.crypto.subtle`) so it runs unchanged in Deno:**
    - `sha256Hex(bytes) → Promise<string>`: lowercase hex.
    - `generateKeyPair() → { seedB64, publicKeyB64 }`: Ed25519, raw 32-byte seed and public key. Import or export the seed through PKCS#8 with a fixed 16-byte prefix (`302e020100300506032b657004220420`). Document this in a code comment.
@@ -479,7 +479,7 @@ Nothing else.
 
 ### Verification (add to the report)
 ```
-pnpm --filter @lplatform/pack-format test
+pnpm --filter @platform/pack-format test
 node packages/pack-format/bin/pack-builder.mjs keygen --role pack --out .local/keys
 node packages/pack-format/bin/pack-builder.mjs import-jplatform --in content/j-platform-question-bank/questions.json --out .local/packs/jbank-source.json --course-id 7b0f5d7e-2b8c-4e47-9d0a-6a2c4f1d9e01 --version 1 --title "Java Practice (imported, unreviewed)"
 node packages/pack-format/bin/pack-builder.mjs course-pack --source .local/packs/jbank-source.json --out .local/packs --seed .local/keys/pack.seed
@@ -532,7 +532,7 @@ The student picks a language, and the desktop app installs a ready-to-use toolch
 
 ### Tasks
 1. **Keys (`keys.rs`):** load the release public key as in C2.
-   - Order: `option_env!("LPLATFORM_RELEASE_PUBKEY")`; then, **only** under `cfg(debug_assertions)` or `cfg(test)`, `{repo}/.local/keys/release.pub` found by walking up from `CARGO_MANIFEST_DIR`.
+   - Order: `option_env!("PLATFORM_RELEASE_PUBKEY")`; then, **only** under `cfg(debug_assertions)` or `cfg(test)`, `{repo}/.local/keys/release.pub` found by walking up from `CARGO_MANIFEST_DIR`.
    - If neither is available, return `Err("PACK_KEY_NOT_CONFIGURED: release")`.
    - Expose `verify_detached(bytes, sig_b64, pubkey_b64) -> bool` (ed25519-dalek, strict verification).
 2. **Index (`index.rs`):**
@@ -564,7 +564,7 @@ The student picks a language, and the desktop app installs a ready-to-use toolch
    - **Concurrency:** only one install at a time per language (a mutex in state). A second call returns the error `IO: install already running`.
 5. **Commands (C6):** `runtimes_list`, `runtimes_available(baseUrl)`, `runtimes_install(baseUrl, language)` (async; runs off the main thread), `runtimes_remove(language, version)` (deletes the folder, then the row).
    - Expose a Rust function `runtimes::resolve(language) -> Result<ResolvedRuntime, String>` returning the newest installed runtime with its index templates, so phase 03 can use it. If none is installed, return `RUNTIME_NOT_INSTALLED: <LANG>`.
-   - Store the templates in the DB row or alongside it as `{version}/.lplatform-runtime.json`; your choice, but document it.
+   - Store the templates in the DB row or alongside it as `{version}/.platform-runtime.json`; your choice, but document it.
 6. **Base URL rules:** `baseUrl` must start with `https://` and end with `/`. `http://localhost` and `http://127.0.0.1` are allowed only in debug builds, for tests. Anything else gives `NETWORK: invalid base url`.
 7. **TypeScript wrapper (`src/lib/runtimes.ts`):**
    - Typed functions for the four commands, plus `onInstallProgress(cb) → unlisten`.
@@ -599,9 +599,9 @@ The student picks a language, and the desktop app installs a ready-to-use toolch
 ### Verification
 ```
 cargo +stable test --manifest-path apps/student-desktop/Cargo.toml runtimes
-pnpm --filter @lplatform/student-desktop test
+pnpm --filter @platform/student-desktop test
 ```
-Plus master §7. **Optional, manual:** build a real Windows Python embeddable pack with phase 01 `lang-pack`, serve `.local/` with `npx http-server .local -p 8787` in debug, and install it through `RuntimeManager` in `pnpm --filter @lplatform/student-desktop tauri dev`. Record it if done, else mark it **Implemented, not verified**.
+Plus master §7. **Optional, manual:** build a real Windows Python embeddable pack with phase 01 `lang-pack`, serve `.local/` with `npx http-server .local -p 8787` in debug, and install it through `RuntimeManager` in `pnpm --filter @platform/student-desktop tauri dev`. Record it if done, else mark it **Implemented, not verified**.
 
 ### Must not
 - No `cmd /c`, `sh -c` or PowerShell to run anything.
@@ -692,7 +692,7 @@ Compile and run student code on the student's own machine against test cases, wi
 - **Fork bomb contained:** the probe spawns children in a loop. The run ends with RE or TLE, and **no probe processes remain** afterwards (check with the job/process list in the test).
 - `COMPILE_ERROR` path: the fake compile template exits 1 with a message; tests are not run; `compileOutput` contains no absolute path.
 - **Hidden-field nulling:** for hidden tests every sensitive field is `None` and serialises to `null`, and nothing beyond the first failing hidden test is reported.
-- **Environment:** the probe prints its environment; it contains none of the parent's variables (set `LPLATFORM_SECRET_TEST=1` in the parent first, and assert it is absent).
+- **Environment:** the probe prints its environment; it contains none of the parent's variables (set `PLATFORM_SECRET_TEST=1` in the parent first, and assert it is absent).
 - **Arguments with spaces and quotes** reach the probe unchanged (Windows quoting).
 - **The work folder is removed** after success, failure and timeout.
 - **Real languages (optional):** if `.local/runtimes-test/<lang>/` exists (the owner can unpack real packs there), run Hello World, WA, CE and TLE for each language present. Otherwise skip and print why.
@@ -744,7 +744,7 @@ The student opens **Platform**, sees their installed course packs (and can impor
 - Create `docs/codex/offline-first/reports/04-report.md`.
 
 ### Tasks
-1. **Pack key:** reuse phase 02 `keys.rs` with role `pack`: env `LPLATFORM_PACK_PUBKEY`, dev file `.local/keys/pack.pub`.
+1. **Pack key:** reuse phase 02 `keys.rs` with role `pack`: env `PLATFORM_PACK_PUBKEY`, dev file `.local/keys/pack.pub`.
 2. **Install (`install.rs`):**
    - `packs_install_from_url(url, sigUrl, expectedSha256)`:
      - Download both into `{app_data}/packs/.partial/` (same rules as phase 02: https only except localhost in debug, size cap 200 MB, retries).
@@ -813,12 +813,12 @@ The student opens **Platform**, sees their installed course packs (and can impor
 ### Verification
 ```
 cargo +stable test --manifest-path apps/student-desktop/Cargo.toml packs
-pnpm --filter @lplatform/student-desktop test
-pnpm --filter @lplatform/student-desktop build
+pnpm --filter @platform/student-desktop test
+pnpm --filter @platform/student-desktop build
 ```
 **Manual, if a real runtime pack is available:**
 1. Build the J bank pack (phase 01 commands).
-2. Run `$env:VITE_OFFLINE_FIRST='1'; pnpm --filter @lplatform/student-desktop tauri dev`.
+2. Run `$env:VITE_OFFLINE_FIRST='1'; pnpm --filter @platform/student-desktop tauri dev`.
 3. Import the pack, pick Java, install Java, solve "Hello World Program", Submit, and get `ACCEPTED`.
 4. Disconnect the network and repeat with another question.
 
@@ -872,7 +872,7 @@ The desktop signs in with Supabase Auth (email OTP) when `VITE_OFFLINE_FIRST=1`.
 ### Tasks
 1. **Secrets abstraction (`secrets.rs`):**
    - A trait `SecretStore { get, set, delete }`, with a keyring implementation (Windows; on other OSes it returns `IO: secure storage unavailable`) and an in-memory implementation used only under `cfg(test)`.
-   - Move nothing that exists. Only add new uses: the device private key (`lplatform/device-key`), and later the phase 10 assessment keys.
+   - Move nothing that exists. Only add new uses: the device private key (`platform/device-key`), and later the phase 10 assessment keys.
 2. **Device (`device.rs`):**
    - On first use, generate `deviceId` (UUID v4) and an Ed25519 key pair. The private seed goes to `SecretStore`; the `device_id` and `public_key` go to the C7 `device` row with `monotonic_seq = 0`.
    - `next_seq()` increments and persists **in the same SQLite transaction** as the row that uses it, so it never repeats after a crash.
@@ -951,9 +951,9 @@ The desktop signs in with Supabase Auth (email OTP) when `VITE_OFFLINE_FIRST=1`.
 ### Verification
 ```
 cargo +stable test --manifest-path apps/student-desktop/Cargo.toml
-pnpm --filter @lplatform/student-desktop test
-$env:VITE_OFFLINE_FIRST='1'; pnpm --filter @lplatform/student-desktop build
-pnpm --filter @lplatform/student-desktop build
+pnpm --filter @platform/student-desktop test
+$env:VITE_OFFLINE_FIRST='1'; pnpm --filter @platform/student-desktop build
+pnpm --filter @platform/student-desktop build
 ```
 Plus master §7.
 
@@ -996,12 +996,12 @@ All of it is tested on the local PostgreSQL cluster with a stub of Supabase's `a
 - `docs/security/security-review.md`.
 
 ### Allowed paths
-- Create `supabase/config.toml` (project id placeholder `lplatform`; auth: email OTP enabled, `enable_signup = false`, OTP expiry 600 s; SMTP left commented with `# configured in dashboard: Brevo`).
+- Create `supabase/config.toml` (project id placeholder `platform`; auth: email OTP enabled, `enable_signup = false`, OTP expiry 600 s; SMTP left commented with `# configured in dashboard: Brevo`).
 - Create `supabase/migrations/20261124000001_core.sql`, `…0002_content.sql`, `…0003_work.sql`, `…0004_kpi.sql`, `…0005_rls.sql`.
 - Create `supabase/scripts/bootstrap-owner.mjs`.
 - Create `supabase/README.md`.
-- Create `packages/supabase-tests/**` (package `@lplatform/supabase-tests`, dev dependency `pg` 8, `node --test`).
-- Modify `scripts/local-postgres.mjs`: **add** a `supabase-test` command that creates the database `lplatform_supabase_test`, applies `supabase/tests-support/auth-stub.sql` and then all `supabase/migrations/*.sql` in name order, and runs `pnpm --filter @lplatform/supabase-tests test` with `SUPABASE_TEST_DATABASE_URL` set. Existing commands must behave exactly as before.
+- Create `packages/supabase-tests/**` (package `@platform/supabase-tests`, dev dependency `pg` 8, `node --test`).
+- Modify `scripts/local-postgres.mjs`: **add** a `supabase-test` command that creates the database `platform_supabase_test`, applies `supabase/tests-support/auth-stub.sql` and then all `supabase/migrations/*.sql` in name order, and runs `pnpm --filter @platform/supabase-tests test` with `SUPABASE_TEST_DATABASE_URL` set. Existing commands must behave exactly as before.
 - Create `supabase/tests-support/auth-stub.sql`.
 - Modify root `package.json`: add the script `"test:supabase": "node scripts/local-postgres.mjs supabase-test"`.
 - Create `docs/codex/offline-first/reports/06-report.md`.
@@ -1368,7 +1368,7 @@ A JavaScript reference calculator defines the exact numbers and is the test orac
    - The `pg_cron` fallback: it is the same formulas as `kpi-calc`, written in Supabase SQL. Spec only; do not implement it in this phase.
 
 ### Tests
-- `pnpm --filter @lplatform/kpi-calc test`:
+- `pnpm --filter @platform/kpi-calc test`:
   - Every fixture equals its expected file.
   - Property tests:
     - Shuffling the event order gives identical output (because of the sort).
@@ -1386,7 +1386,7 @@ A JavaScript reference calculator defines the exact numbers and is the test orac
 
 ### Verification
 ```
-pnpm --filter @lplatform/kpi-calc test
+pnpm --filter @platform/kpi-calc test
 node oracle/atp/verify.mjs        # prints SKIPPED without ATP_* env
 ```
 Plus master §7.
@@ -1428,8 +1428,8 @@ A static single-page web app, deployable to GitHub Pages or Cloudflare Pages, th
 - `apps/web/src/app/globals.css` (or the Tailwind theme): the brand colours and spacing, to match the look.
 
 ### Allowed paths
-- Create `apps/dashboard/**` (package `@lplatform/dashboard`, Vite + React 19 + TypeScript strict).
-  - Dependencies: `@supabase/supabase-js` 2, `react-router-dom` 7 (**HashRouter** only), `recharts` 2, `@lplatform/language-config`.
+- Create `apps/dashboard/**` (package `@platform/dashboard`, Vite + React 19 + TypeScript strict).
+  - Dependencies: `@supabase/supabase-js` 2, `react-router-dom` 7 (**HashRouter** only), `recharts` 2, `@platform/language-config`.
   - Dev dependencies: `vite`, `@vitejs/plugin-react`, `typescript`, `vitest`, `@testing-library/react`, `@testing-library/user-event`, `jsdom`, `@playwright/test`, at the versions already used in the repo where they exist.
 - Create `.github/workflows/dashboard-pages.yml`.
 - Modify `pnpm-lock.yaml`.
@@ -1486,7 +1486,7 @@ A static single-page web app, deployable to GitHub Pages or Cloudflare Pages, th
   - The publish-pack 409 message is shown.
   - The student submission detail renders no hidden-test fields even when the mock wrongly includes them. Defence in depth: the component must ignore those fields.
   - The "Not configured" screen.
-- **Build test:** `pnpm --filter @lplatform/dashboard build` succeeds, and the `dist/` grep for service keys passes.
+- **Build test:** `pnpm --filter @platform/dashboard build` succeeds, and the `dist/` grep for service keys passes.
 - **Playwright** (`apps/dashboard/e2e/`): against `vite preview` with a **mock data source** selected by `VITE_DATA_SOURCE=mock`, which only exists in a test build mode.
   - Every role's main pages at 1280×800 and 390×844, in light and dark.
   - No horizontal overflow, and no console errors.
@@ -1496,9 +1496,9 @@ A static single-page web app, deployable to GitHub Pages or Cloudflare Pages, th
 
 ### Verification
 ```
-pnpm --filter @lplatform/dashboard test
-pnpm --filter @lplatform/dashboard build
-pnpm --filter @lplatform/dashboard exec playwright test
+pnpm --filter @platform/dashboard test
+pnpm --filter @platform/dashboard build
+pnpm --filter @platform/dashboard exec playwright test
 ```
 Plus master §7.
 
@@ -1579,7 +1579,7 @@ A teacher schedules an assessment. Students download it in advance, start it at 
    - Response: `{ accepted: [ids], duplicates: [ids], rejected: [{ id, error }] }`. A rejected attempt is never inserted.
 6. **Desktop:**
    - **`assessment.rs`:**
-     - `assessment_store_key(assessmentId, keyId, keyB64)` stores the key in `SecretStore` under `lplatform/assessment/{assessmentId}`.
+     - `assessment_store_key(assessmentId, keyId, keyB64)` stores the key in `SecretStore` under `platform/assessment/{assessmentId}`.
      - `run_question` `SUBMIT` on an `ASSESSMENT` pack:
        - Load the key (no key gives `ASSESSMENT_LOCKED`), decrypt the hidden tests **in Rust memory only**, run, and drop the plaintext.
        - Enforce `attemptsAllowed` locally (`ATTEMPTS_EXCEEDED`), and the duration from the first `question_opened` of that assessment.
@@ -1592,7 +1592,7 @@ A teacher schedules an assessment. Students download it in advance, start it at 
    - **`offline-sync.ts`:** attempts with `assessment_id` go to `submit-assessment-attempts` instead of the direct upsert. `rejected` items are parked with their error and shown to the student.
    - After login, call `register-device` once per device.
 7. **Re-check worker (`apps/api/src/modules/judge/recheck-worker.ts`):**
-   - A separate process (`pnpm --filter @lplatform/api recheck:worker`), configured by `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `JUDGE0_URL` and `JUDGE0_AUTH_TOKEN`.
+   - A separate process (`pnpm --filter @platform/api recheck:worker`), configured by `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `JUDGE0_URL` and `JUDGE0_AUTH_TOKEN`.
    - It refuses to start unless `JUDGE_PROVIDER=judge0`. **Never** use `local-unsandboxed-dev` here.
    - It claims `QUEUED` rows (`update … set recheck_status='RUNNING' where id = (select id … for update skip locked limit 1) returning *`, through an RPC function you add in the 0006 migration, `claim_recheck()`, `security definer`, granted to `service_role` only).
    - It loads all tests from `question_tests`, runs them through the existing `Judge0Provider`, and writes `recheck_verdict`, `recheck_passed`, `recheck_total`, `recheck_at` and `DONE`.
@@ -1631,9 +1631,9 @@ A teacher schedules an assessment. Students download it in advance, start it at 
 pnpm test:supabase
 node --test supabase/functions/_shared
 cargo +stable test --manifest-path apps/student-desktop/Cargo.toml
-pnpm --filter @lplatform/student-desktop test
-pnpm --filter @lplatform/dashboard test
-pnpm --filter @lplatform/api test
+pnpm --filter @platform/student-desktop test
+pnpm --filter @platform/dashboard test
+pnpm --filter @platform/api test
 ```
 Plus master §7.
 

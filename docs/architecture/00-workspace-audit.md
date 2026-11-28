@@ -1,25 +1,25 @@
 # Workspace audit
 
-Audit date: 2026-11-20. Scope: files present in `L_Platform/` and `J_Platform/` in this workspace. This describes the checked-out files, not upstream repositories or claims in their READMEs.
+Audit date: 2026-11-20. Scope: files present in `PLATFORM/` and `J_Platform/` in this workspace. This describes the checked-out files, not upstream repositories or claims in their READMEs.
 
 ## Repository and environment findings
 
 - Workspace root: `C:/Users/sshub/Videos/Platform`.
 - Neither project directory contains a `.git` repository; `git status` and `git rev-parse` fail. No Git diff or uncommitted-change inventory can be established from this checkout.
-- No workspace-root `AGENTS.md` was found. Project instructions were found in L_Platform backend, web and application directories. Their key rules are summarized below.
-- L_Platform has backend, web and student application subprojects. Backend and app declare pnpm; web declares pnpm 10.20.0. The backend declares pnpm 12.18.0 and Node 24. No lockfile was found in the inspected backend directory.
+- No workspace-root `AGENTS.md` was found. Project instructions were found in PLATFORM backend, web and application directories. Their key rules are summarized below.
+- PLATFORM has backend, web and student application subprojects. Backend and app declare pnpm; web declares pnpm 10.20.0. The backend declares pnpm 12.18.0 and Node 24. No lockfile was found in the inspected backend directory.
 - J_Platform has only `client/` and `admin/` source directories plus root package metadata, README and a Compose file. Its README refers to `server/`, `desktop/`, `docker/`, `supabase/`, `docs/`, Prisma, Electron and a local judge, but those paths are absent here. `client/` contains only package/config/HTML files; its application source is absent.
 - No J_Platform backend, Prisma schema, migrations, Electron sources, desktop runtime, judge implementation, local database, Dockerfiles or tests are present in this workspace. The Compose file references absent Docker build contexts.
 - No production credentials were inspected or copied. L backend `.env` was absent.
 
 ## Actual architecture observed
 
-### L_Platform
+### PLATFORM
 
 - Backend: Fastify 5, TypeScript, Drizzle ORM, PostgreSQL (`pg`), Supabase-compatible database deployment. This is not Express or Prisma.
 - Routes cover authentication, organizations, users, classes, sections, courses, allocations, questions, test cases, assignments, assessments, submissions, learning, reports, downloads, invitations, audit and settings.
 - Schema includes organizations/users/credentials/refresh sessions, classes/sections/memberships, courses/allocations, questions/test cases, assignments/submissions/results, assessments/attempts/answers/reviews, lesson progress, invitations, audit logs and platform settings.
-- RLS support sets request context within a transaction and uses restricted role `lplatform_app`; migrations and integration tests exist. The README describes forced RLS policies. This audit did not run a disposable PostgreSQL instance to independently verify every policy.
+- RLS support sets request context within a transaction and uses restricted role `platform_app`; migrations and integration tests exist. The README describes forced RLS policies. This audit did not run a disposable PostgreSQL instance to independently verify every policy.
 - Authentication uses short-lived JWTs and rotating refresh sessions. The code and docs describe bearer token desktop support and HttpOnly web cookies. Existing roles are a legacy set, not the full requested scoped role-assignment model.
 - Coding submissions are stored pending faculty review. `evaluator.service.ts` starts local child processes and is explicitly documented as unsafe; it is not called from the submission route. Do not enable it as a judge.
 - OCI and Supabase integration modules exist. OCI upload requires configuration; API docs state unavailable storage returns 503. Email delivery for invitations is not implemented.
@@ -56,4 +56,4 @@ Audit date: 2026-11-20. Scope: files present in `L_Platform/` and `J_Platform/` 
 
 ## Immediate conclusion
 
-The checked-out workspace is not the two complete platforms described by the prompt. L_Platform provides the only complete backend and Tauri student app. J_Platform contributes partial client/admin assets, but its claimed desktop/backend/judge are missing. Phase 0 documentation can be completed from evidence; a real cross-platform workflow cannot responsibly be implemented or tested until the missing J_Platform sources are restored or the user confirms this partial checkout is intentional.
+The checked-out workspace is not the two complete platforms described by the prompt. PLATFORM provides the only complete backend and Tauri student app. J_Platform contributes partial client/admin assets, but its claimed desktop/backend/judge are missing. Phase 0 documentation can be completed from evidence; a real cross-platform workflow cannot responsibly be implemented or tested until the missing J_Platform sources are restored or the user confirms this partial checkout is intentional.

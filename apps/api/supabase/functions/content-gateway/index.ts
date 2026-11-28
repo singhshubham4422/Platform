@@ -1,5 +1,5 @@
 /**
- * L_Platform Supabase Edge Function — Secure Content Gateway
+ * PLATFORM Supabase Edge Function — Secure Content Gateway
  *
  * Bridges Supabase Auth / PostgreSQL student eligibility with OCI PostgreSQL
  * published curriculum & private OCI Object Storage.
@@ -130,9 +130,9 @@ export async function handleRequest(req: Request): Promise<Response> {
     method: req.method,
     headers: {
       'Content-Type': 'application/json',
-      'X-LPlatform-Verified-User': caller.id,
-      'X-LPlatform-Verified-Role': role,
-      'X-LPlatform-Verified-Org': organizationId ?? '',
+      'X-Platform-Verified-User': caller.id,
+      'X-Platform-Verified-Role': role,
+      'X-Platform-Verified-Org': organizationId ?? '',
       ...(env.ociInternalBridgeToken
         ? { Authorization: `Bearer ${env.ociInternalBridgeToken}` }
         : {}),

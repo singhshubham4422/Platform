@@ -65,6 +65,7 @@ mod probe {
             source_file: "main.py".into(),
             compile: None,
             run,
+            env: Vec::new(),
         }
     }
 
@@ -222,7 +223,7 @@ mod probe {
     #[test]
     fn student_process_does_not_inherit_the_parent_environment() {
         // SAFETY: single test touching this variable; set before spawning.
-        unsafe { std::env::set_var("LPLATFORM_SECRET_TEST", "1") };
+        unsafe { std::env::set_var("PLATFORM_SECRET_TEST", "1") };
         let r = run(
             &["env"],
             vec![TestCase {
@@ -236,7 +237,7 @@ mod probe {
             64,
         );
         let out = r.tests[0].stdout.clone().unwrap_or_default();
-        assert!(!out.contains("LPLATFORM_SECRET_TEST"), "parent env leaked");
+        assert!(!out.contains("PLATFORM_SECRET_TEST"), "parent env leaked");
         assert!(out.to_uppercase().contains("PATH="));
     }
 

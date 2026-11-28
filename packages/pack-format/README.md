@@ -1,4 +1,4 @@
-# @lplatform/pack-format
+# @platform/pack-format
 
 Shared, dependency-light builders and validators for signed language indexes and `.lpack` files. The JSON shapes follow the [offline-first master contracts](../../docs/codex/offline-first/00-MASTER-PROMPT.md#c2-signing).
 

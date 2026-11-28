@@ -72,7 +72,7 @@ Compile and run student code on the student's own machine against test cases, wi
 - **Fork bomb contained:** the probe spawns children in a loop. The run ends with RE or TLE, and **no probe processes remain** afterwards (check with the job/process list in the test).
 - `COMPILE_ERROR` path: the fake compile template exits 1 with a message; tests are not run; `compileOutput` contains no absolute path.
 - **Hidden-field nulling:** for hidden tests every sensitive field is `None` and serialises to `null`, and nothing beyond the first failing hidden test is reported.
-- **Environment:** the probe prints its environment; it contains none of the parent's variables (set `LPLATFORM_SECRET_TEST=1` in the parent first, and assert it is absent).
+- **Environment:** the probe prints its environment; it contains none of the parent's variables (set `PLATFORM_SECRET_TEST=1` in the parent first, and assert it is absent).
 - **Arguments with spaces and quotes** reach the probe unchanged (Windows quoting).
 - **The work folder is removed** after success, failure and timeout.
 - **Real languages (optional):** if `.local/runtimes-test/<lang>/` exists (the owner can unpack real packs there), run Hello World, WA, CE and TLE for each language present. Otherwise skip and print why.

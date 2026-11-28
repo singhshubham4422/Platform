@@ -197,10 +197,20 @@ pub fn run() {
         .setup(|app| {
             let dir = app.path().app_data_dir()?;
             std::fs::create_dir_all(&dir)?;
-            let conn = store::open(&dir.join("lplatform.db"))
+            let conn = store::open(&dir.join("platform.db"))
                 .map_err(|e| format!("cannot open local database: {e}"))?;
             app.manage(Store(Mutex::new(conn)));
-            app.manage(runtimes::RuntimeManager::new(dir.clone()));
+            let bundled = app
+                .path()
+                .resource_dir()
+                .ok()
+                .map(|d| d.join("runtimes"))
+                .filter(|d| d.join("manifest.json").is_file());
+            let manager = runtimes::RuntimeManager::new(dir.clone()).with_bundled(bundled.clone());
+            if let Some(root) = bundled {
+                warm_up_bundled(root, manager.cache_dir(), dir.join("runner"));
+            }
+            app.manage(manager);
             app.manage(packs::PackManager::new(dir.clone()));
             app.manage(secrets::Secrets(Box::new(secrets::KeyringSecrets)));
             if cfg!(debug_assertions) {
@@ -263,8 +273,25 @@ pub fn run() {
 }
 
 #[tauri::command]
-fn runtimes_list(state: State<'_, Store>) -> CmdResult<Vec<runtimes::RuntimeInfo>> {
-    runtimes::runtimes_list(&state)
+fn runtimes_list(
+    state: State<'_, Store>,
+    manager: State<'_, runtimes::RuntimeManager>,
+) -> CmdResult<Vec<runtimes::RuntimeInfo>> {
+    runtimes::runtimes_list(&state, &manager)
+}
+
+/// Fill the bundled C/C++ compiler's cache in the background so the first student compile is fast.
+fn warm_up_bundled(root: std::path::PathBuf, cache: std::path::PathBuf, work: std::path::PathBuf) {
+    std::thread::spawn(move || {
+        let _ = std::fs::create_dir_all(&work);
+        for language in ["C", "CPP"] {
+            if let Some(rt) = runtimes::bundled::resolve(&root, &cache, language)
+                && let Err(e) = runner::warm_up(&rt, &work)
+            {
+                log::warn!("warm-up for {language} failed: {e}");
+            }
+        }
+    });
 }
 
 #[tauri::command]
@@ -506,7 +533,7 @@ fn assessment_status(
 }
 
 #[cfg(target_os = "windows")]
-const CREDENTIAL_SERVICE: &str = "com.lplatform.student";
+const CREDENTIAL_SERVICE: &str = "com.platform.student";
 #[cfg(target_os = "windows")]
 const CREDENTIAL_USER: &str = "auth-session";
 
@@ -585,9 +612,9 @@ mod tests {
     fn non_windows_store_returns_explicit_error_and_windows_roundtrips_isolated_key() {
         #[cfg(target_os = "windows")]
         {
-            assert_eq!(CREDENTIAL_SERVICE, "com.lplatform.student");
+            assert_eq!(CREDENTIAL_SERVICE, "com.platform.student");
             assert_eq!(CREDENTIAL_USER, "auth-session");
-            let test_service = "com.lplatform.student.unit-test";
+            let test_service = "com.platform.student.unit-test";
             let test_user = "test-session-entry";
             let _ = delete_session_from_keyring(test_service, test_user);
             assert_eq!(

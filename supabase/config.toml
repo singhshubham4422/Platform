@@ -1,4 +1,4 @@
-project_id = "lplatform"
+project_id = "platform"
 
 [auth]
 enable_signup = false

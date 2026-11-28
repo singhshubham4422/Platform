@@ -13,7 +13,7 @@ pub struct PackData {
     pub files: HashMap<String, Vec<u8>>,
 }
 pub fn pack_key() -> Result<String, String> {
-    if let Some(k) = option_env!("LPLATFORM_PACK_PUBKEY").filter(|s| !s.trim().is_empty()) {
+    if let Some(k) = option_env!("PLATFORM_PACK_PUBKEY").filter(|s| !s.trim().is_empty()) {
         return Ok(k.trim().into());
     }
     #[cfg(debug_assertions)]

@@ -60,7 +60,7 @@ A teacher schedules an assessment. Students download it in advance, start it at 
    - Response: `{ accepted: [ids], duplicates: [ids], rejected: [{ id, error }] }`. A rejected attempt is never inserted.
 6. **Desktop:**
    - **`assessment.rs`:**
-     - `assessment_store_key(assessmentId, keyId, keyB64)` stores the key in `SecretStore` under `lplatform/assessment/{assessmentId}`.
+     - `assessment_store_key(assessmentId, keyId, keyB64)` stores the key in `SecretStore` under `platform/assessment/{assessmentId}`.
      - `run_question` `SUBMIT` on an `ASSESSMENT` pack:
        - Load the key (no key gives `ASSESSMENT_LOCKED`), decrypt the hidden tests **in Rust memory only**, run, and drop the plaintext.
        - Enforce `attemptsAllowed` locally (`ATTEMPTS_EXCEEDED`), and the duration from the first `question_opened` of that assessment.
@@ -73,7 +73,7 @@ A teacher schedules an assessment. Students download it in advance, start it at 
    - **`offline-sync.ts`:** attempts with `assessment_id` go to `submit-assessment-attempts` instead of the direct upsert. `rejected` items are parked with their error and shown to the student.
    - After login, call `register-device` once per device.
 7. **Re-check worker (`apps/api/src/modules/judge/recheck-worker.ts`):**
-   - A separate process (`pnpm --filter @lplatform/api recheck:worker`), configured by `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `JUDGE0_URL` and `JUDGE0_AUTH_TOKEN`.
+   - A separate process (`pnpm --filter @platform/api recheck:worker`), configured by `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `JUDGE0_URL` and `JUDGE0_AUTH_TOKEN`.
    - It refuses to start unless `JUDGE_PROVIDER=judge0`. **Never** use `local-unsandboxed-dev` here.
    - It claims `QUEUED` rows (`update … set recheck_status='RUNNING' where id = (select id … for update skip locked limit 1) returning *`, through an RPC function you add in the 0006 migration, `claim_recheck()`, `security definer`, granted to `service_role` only).
    - It loads all tests from `question_tests`, runs them through the existing `Judge0Provider`, and writes `recheck_verdict`, `recheck_passed`, `recheck_total`, `recheck_at` and `DONE`.
@@ -112,9 +112,9 @@ A teacher schedules an assessment. Students download it in advance, start it at 
 pnpm test:supabase
 node --test supabase/functions/_shared
 cargo +stable test --manifest-path apps/student-desktop/Cargo.toml
-pnpm --filter @lplatform/student-desktop test
-pnpm --filter @lplatform/dashboard test
-pnpm --filter @lplatform/api test
+pnpm --filter @platform/student-desktop test
+pnpm --filter @platform/dashboard test
+pnpm --filter @platform/api test
 ```
 Plus master §7.
 

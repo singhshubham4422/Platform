@@ -17,7 +17,7 @@ Written by Claude, 2026-11-25. Codex skipped this phase; Claude built it.
 | Attempts stored, hidden fields nulled, signed canonical JSON | Verified | same | 4 attempt tests, including the byte-exact server fixture |
 | Activity append / seal / ack / backlog compaction | Verified | same | 3 activity tests |
 | Canonical JSON identical on the server | Verified | `node --test supabase/functions/_shared/canonical-attempt.test.mjs` | 1 pass |
-| Supabase client with keychain session storage | Verified | `pnpm --filter @lplatform/student-desktop test` | 54 passed (all desktop TS) |
+| Supabase client with keychain session storage | Verified | `pnpm --filter @platform/student-desktop test` | 54 passed (all desktop TS) |
 | Sign-in: generic message, students only, disabled refused | Verified | same | `SupabaseLogin.test.tsx` (jsdom) |
 | Sync engine order, 401 pause, PUT failure keeps batch, park 4xx, duplicate = success, assessment route | Verified | same | `offline-sync.test.ts`, 9 tests |
 | Flag off keeps the legacy outbox; flag on routes to the activity queue | Verified | same | `outbox-flag.test.ts` |

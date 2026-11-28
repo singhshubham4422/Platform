@@ -133,6 +133,7 @@ fn minimal_env(command: &mut Command, rt: &ResolvedRuntime, work: &Path) {
         .env("USERPROFILE", work)
         .env("LANG", "C.UTF-8")
         .env("PYTHONIOENCODING", "utf-8")
+        .envs(rt.env.iter().map(|(k, v)| (k.as_str(), v.as_str())))
         .current_dir(work)
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
@@ -162,18 +163,38 @@ fn execute(
     cpu_time: Duration,
     out_limit: usize,
     mem_mb: u64,
+    compile: bool,
 ) -> Result<Output, String> {
     let mut cmd = Command::new(program);
     cmd.args(args);
     minimal_env(&mut cmd, rt, work);
     #[cfg(unix)]
-    limits_unix::set_limits(&mut cmd, cpu_time, mem_mb, rt.language == "JAVA");
+    limits_unix::set_limits(&mut cmd, cpu_time, mem_mb, rt.language == "JAVA", compile);
     let start = Instant::now();
     let mut child = cmd
         .spawn()
         .map_err(|e| format!("IO: unable to start runtime: {e}"))?;
     #[cfg(windows)]
-    let job = match limits_windows::assign_job(Some(child.id()), mem_mb, cpu_time) {
+    // Like the Unix limits, leave the JVM room for its own overhead beyond the heap.
+    let job_mb = if rt.language == "JAVA" {
+        mem_mb + 512
+    } else {
+        mem_mb
+    };
+    // A compiler is trusted code that may run parallel helper processes (zig/clang do).
+    // Job CPU time is summed over all of the compiler's parallel processes.
+    let cpu_time = if compile {
+        let cores = thread::available_parallelism().map_or(4, |n| n.get()) as u32;
+        cpu_time.saturating_mul(cores.max(1))
+    } else {
+        cpu_time
+    };
+    let (job_mb, max_processes) = if compile {
+        (job_mb.max(2048), 64)
+    } else {
+        (job_mb, 16)
+    };
+    let job = match limits_windows::assign_job(Some(child.id()), job_mb, cpu_time, max_processes) {
         Ok(job) => job,
         Err(error) => {
             let _ = child.kill();
@@ -351,6 +372,7 @@ fn run_tests_inner(spec: &RunSpec, rt: &ResolvedRuntime, work_root: &Path) -> Ru
                 Duration::from_millis(compile_timeout(&spec.language)),
                 64 * 1024,
                 1024,
+                true,
             )
         });
         match compiled_result {
@@ -428,6 +450,7 @@ fn run_tests_inner(spec: &RunSpec, rt: &ResolvedRuntime, work_root: &Path) -> Ru
             Duration::from_millis(spec.limits.time_limit_ms),
             (spec.limits.output_limit_kb * 1024) as usize,
             spec.limits.memory_limit_mb,
+            false,
         );
         let (verdict, out, err, time, memory) = match o {
             Ok(o) => {
@@ -522,11 +545,66 @@ fn result(
         finished_at: timestamp(),
     }
 }
+/// Compile a tiny program once so the first real compile is fast (fills compiler caches).
+pub fn warm_up(rt: &ResolvedRuntime, work_root: &Path) -> Result<(), String> {
+    let Some(template) = &rt.compile else {
+        return Ok(());
+    };
+    let root = work_root.join(format!("warm-{}", uuid::Uuid::new_v4()));
+    let _guard = WorkDir(root.clone());
+    let srcdir = root.join("src");
+    let outdir = root.join("out");
+    fs::create_dir_all(&srcdir).map_err(|e| format!("IO: {e}"))?;
+    fs::create_dir_all(&outdir).map_err(|e| format!("IO: {e}"))?;
+    let (name, source) = match rt.language.as_str() {
+        "JAVA" => (
+            "Main.java",
+            "public class Main { public static void main(String[] a) { System.out.println(1); } }",
+        ),
+        "CPP" => (
+            "main.cpp",
+            "#include <iostream>\nint main() { std::cout << 1 << std::endl; return 0; }\n",
+        ),
+        _ => (
+            "main.c",
+            "#include <stdio.h>\nint main(void) { printf(\"1\\n\"); return 0; }\n",
+        ),
+    };
+    let name = if rt.language == "JAVA" {
+        name.to_string()
+    } else {
+        rt.source_file.clone()
+    };
+    let src = srcdir.join(name);
+    fs::write(&src, source).map_err(|e| format!("IO: {e}"))?;
+    let exe = outdir.join(if cfg!(windows) { "main.exe" } else { "main" });
+    let (program, args) = quote_template(template, rt, &src, &outdir, &exe, "Main", 1024)?;
+    let limit = Duration::from_secs(600);
+    let out = execute(
+        &program,
+        &args,
+        "",
+        rt,
+        &root,
+        limit,
+        limit,
+        64 * 1024,
+        2048,
+        true,
+    )?;
+    if out.code == Some(0) && !out.timed {
+        Ok(())
+    } else {
+        Err(clean(&[out.err, out.out].concat(), &root))
+    }
+}
+
 fn compile_timeout(lang: &str) -> u64 {
     match lang {
         "PYTHON" => 10_000,
-        "C" => 15_000,
-        "CPP" => 20_000,
+        // The first C/C++ compile builds the bundled compiler's C library cache.
+        "C" => 300_000,
+        "CPP" => 300_000,
         "JAVA" => 30_000,
         _ => 10_000,
     }

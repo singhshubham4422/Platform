@@ -14,7 +14,7 @@ import {
   ShieldCheck,
   Trash2,
 } from 'lucide-react';
-import { LANGUAGES } from '@lplatform/language-config';
+import { LANGUAGES } from '@platform/language-config';
 import type { CatalogCourse, User } from '../types';
 import { fetchCoursesCatalog } from '../lib/api';
 import {
@@ -470,12 +470,12 @@ export const StudentSettings: React.FC<{ user: User; isOnline: boolean; onLogout
       </section>
       <section className="sv-card">
         <h2><ShieldCheck size={16} /> Privacy and activity transparency</h2>
-        <p>While you work on a question in this app, L_Platform records: when you open a question, edits to your code (saved revisions), pastes into the editor (size only, and whether it came from inside the editor), runs, submissions and results, and when this app window loses or regains focus for more than three seconds.</p>
+        <p>While you work on a question in this app, PLATFORM records: when you open a question, edits to your code (saved revisions), pastes into the editor (size only, and whether it came from inside the editor), runs, submissions and results, and when this app window loses or regains focus for more than three seconds.</p>
         <p className="sv-muted">It does not read your clipboard, record keystrokes outside the editor, take screenshots, or observe other applications. Your faculty can review this history for your coursework; it is treated as context, not as proof of misconduct.</p>
       </section>
       <section className="sv-card">
         <h2><BookOpen size={16} /> About</h2>
-        <p className="sv-muted">L_Platform Student · version {__APP_VERSION__} · Languages: {LANGUAGES.map((l) => `${l.label} (${l.standard})`).join(', ')}. Code runs on the college judge, never on this computer.</p>
+        <p className="sv-muted">PLATFORM Student · version {__APP_VERSION__} · Languages: {LANGUAGES.map((l) => `${l.label} (${l.standard})`).join(', ')}. Code runs on the college judge, never on this computer.</p>
       </section>
     </div>
   );

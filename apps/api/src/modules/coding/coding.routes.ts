@@ -4,7 +4,7 @@
 import { createHash } from 'node:crypto';
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
-import { LANGUAGES, isLanguageId } from '@lplatform/language-config';
+import { LANGUAGES, isLanguageId } from '@platform/language-config';
 import { authenticate, isPlatformDeveloperRole, requireRole } from '../../middleware/auth.js';
 import { Errors } from '../../lib/errors.js';
 import { studentExecutionEnabled } from '../judge/judge.service.js';

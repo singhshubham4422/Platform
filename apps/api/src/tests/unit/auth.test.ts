@@ -55,7 +55,7 @@ describe('Auth Service & Tenant Isolation', () => {
   it('enforces multi-tenant organization access correctly', () => {
     const platformAdmin = {
       userId: 'admin-1',
-      email: 'admin@lplatform.dev',
+      email: 'admin@platform.dev',
       role: 'PLATFORM_ADMIN' as const,
       organizationId: null,
       name: 'Admin',

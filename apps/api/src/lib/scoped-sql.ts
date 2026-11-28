@@ -1,5 +1,5 @@
 // Raw-SQL helper for workers and services that need several statements in one transaction
-// under a specific RLS context (always via the restricted lplatform_app role when present).
+// under a specific RLS context (always via the restricted platform_app role when present).
 import type pg from 'pg';
 import { pool, isRestrictedRoleAvailable } from '../db/connection.js';
 import { applySessionRlsVars, getCurrentRlsContext, type RlsContext } from '../db/rls-context.js';

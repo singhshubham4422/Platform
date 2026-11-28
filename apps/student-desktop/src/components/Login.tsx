@@ -86,9 +86,9 @@ export const Login: React.FC<LoginProps> = ({ onSuccess }) => {
     <div className="login-shell">
       <header className="login-topbar">
         <div className="login-brand">
-          <span className="brand-mark">LP</span>
+          <span className="brand-mark">P</span>
           <div className="login-brand-text">
-            <strong>L Platform</strong>
+            <strong>PLATFORM</strong>
             <span>Student app</span>
           </div>
         </div>
@@ -304,7 +304,7 @@ export const Login: React.FC<LoginProps> = ({ onSuccess }) => {
             {CAN_CONFIGURE_SERVER && showServerConfig && (
               <div className="server-config-box">
                 <div className="form-field" style={{ marginBottom: 0 }}>
-                  <label htmlFor="backend-url-input">L_Platform API Endpoint</label>
+                  <label htmlFor="backend-url-input">PLATFORM API Endpoint</label>
                   <input
                     id="backend-url-input"
                     type="url"

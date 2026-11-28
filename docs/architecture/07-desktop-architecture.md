@@ -1,6 +1,6 @@
 # Desktop architecture
 
-L_Platform is the only desktop source present: Tauri 2, React/TypeScript, Rust shell, CodeMirror 6, Pyodide-based offline Python and a Windows keyring dependency. The README describes assignment drafts/queue and results. The app package has storage and smoke tests plus a Tauri configuration. Its UI is not Monaco and its Rust SQLite responsibilities need implementation-level verification before expansion.
+PLATFORM is the only desktop source present: Tauri 2, React/TypeScript, Rust shell, CodeMirror 6, Pyodide-based offline Python and a Windows keyring dependency. The README describes assignment drafts/queue and results. The app package has storage and smoke tests plus a Tauri configuration. Its UI is not Monaco and its Rust SQLite responsibilities need implementation-level verification before expansion.
 
 J_Platform README describes an Electron client and bundled OpenJDK 21, but Electron main/preload/server/client sources are absent. Do not remove or claim parity with that application based on README alone.
 

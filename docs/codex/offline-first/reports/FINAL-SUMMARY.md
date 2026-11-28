@@ -57,7 +57,7 @@ Branches: `main` = `offline-first`, pushed to https://github.com/singhshubham442
 | Practice content | "Java Practice (imported, unreviewed)": 240 questions, 479 visible / 248 hidden tests, PUBLISHED, pack `7b0f5d7e-2b8c-4e47-9d0a-6a2c4f1d9e01@1` uploaded and recorded | Management API query, object HEAD size match |
 | Oracle bucket `lplatform-files` | Private, 365-day delete rule on `raw/activity/`, read-only PAR on `packs/lang/` until 2027-11-25 | OCI CLI |
 | Language packs | Python 3.12.10, Java 21.0.13.1 (jlink), C and C++ (GCC 16.2.0, static linking), signed with `.local/keys/release.seed`; index signed | Signature and hash verified, validator passed, smoke-tested locally |
-| Dashboard | https://lplatform-dashboard.vercel.app (Vercel, static) | Loaded in the browser; sign-in page renders |
+| Dashboard | https://platform-dashboard.vercel.app (Vercel, static) | Loaded in the browser; sign-in page renders |
 
 ### Live end-to-end test (2026-11-25)
 35 checks passed against the live services, using real e-mailed codes (Brevo): owner sign-in and invites; student sign-in, catalog, signed course-pack and Java-pack download and verification; the solution compiled with the downloaded JDK and passed the visible and hidden tests; device registration; signed, idempotent submission (pinned to the student); activity batch upload to Oracle (oversized batch refused); RLS (no hidden tests or keys for students; own profile and submissions only; no delete); teacher sees the class student's submission and releases feedback, and the student receives it.
@@ -65,7 +65,7 @@ The run found and fixed two production bugs: every Object Storage link request r
 The desktop GUI itself was not driven; the test followed the same API calls as its sync code.
 
 ### Still open
-- **Desktop release build** must be compiled with `LPLATFORM_RELEASE_PUBKEY` and `LPLATFORM_PACK_PUBKEY` set to the contents of `.local/keys/release.pub` and `pack.pub`, and `.env` values for `VITE_*`; otherwise installs fail with `PACK_KEY_NOT_CONFIGURED`.
+- **Desktop release build** must be compiled with `PLATFORM_RELEASE_PUBKEY` and `PLATFORM_PACK_PUBKEY` set to the contents of `.local/keys/release.pub` and `pack.pub`, and `.env` values for `VITE_*`; otherwise installs fail with `PACK_KEY_NOT_CONFIGURED`.
 - **Signing keys:** the release and pack keys in `.local/keys` were generated as development keys but are now the live keys. Keep `.local/` backed up and private; losing them means re-signing every pack.
 - **Not yet run end to end:** the desktop GUI itself, the KPI cycle (needs ATP), and an assessment journey. No real student or college accounts exist yet (only the platform owner).
 - **ATP KPI pipeline** is not set up in Oracle (schemas `LPKPI`/`LPKPI_VERIFY`, credential, scheduler).
@@ -77,7 +77,7 @@ The desktop GUI itself was not driven; the test followed the same API calls as i
 
 - A Supabase project with migrations `0001`–`0006` applied, Edge Functions deployed, and Brevo SMTP configured for Auth email OTP.
 - An Oracle Object Storage bucket, OCI API key, and a read-only PAR for `packs/lang/`.
-- Production Ed25519 release and pack signing keys (`LPLATFORM_RELEASE_PUBKEY`, `LPLATFORM_PACK_PUBKEY`, `PACK_SIGNING_KEY`).
+- Production Ed25519 release and pack signing keys (`PLATFORM_RELEASE_PUBKEY`, `PLATFORM_PACK_PUBKEY`, `PACK_SIGNING_KEY`).
 - Oracle ATP access with the `LPKPI` and `LPKPI_VERIFY` schemas.
 - A domain for hosting / callbacks.
 - An x86 Linux PC for the Judge0 re-check worker (`infra/judge/production/README.md`).

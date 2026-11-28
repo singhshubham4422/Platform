@@ -73,9 +73,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ user, active, isOnline, pendin
   return (
     <aside className="lp-sidebar">
       <button type="button" className="lp-brand" onClick={() => onNavigate('overview')}>
-        <span className="hr-brand-mark">LP</span>
+        <span className="hr-brand-mark">P</span>
         <span>
-          L_Platform
+          PLATFORM
           <small>Student</small>
         </span>
       </button>

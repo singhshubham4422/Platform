@@ -1,5 +1,5 @@
 {
-  "name": "@lplatform/language-config",
+  "name": "@platform/language-config",
   "version": "1.0.0",
   "private": true,
   "type": "module",

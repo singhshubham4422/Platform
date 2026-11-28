@@ -17,7 +17,7 @@ fn local_release_key(start: &Path) -> Option<String> {
 
 pub fn release_public_key() -> Result<String, String> {
     release_public_key_from(
-        option_env!("LPLATFORM_RELEASE_PUBKEY"),
+        option_env!("PLATFORM_RELEASE_PUBKEY"),
         if cfg!(any(debug_assertions, test)) {
             local_release_key(Path::new(env!("CARGO_MANIFEST_DIR")))
         } else {

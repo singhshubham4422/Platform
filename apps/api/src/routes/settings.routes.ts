@@ -23,7 +23,7 @@ const defaultPreferences = {
   adminProfile: {
     firstName: 'Platform',
     lastName: 'Administrator',
-    email: 'admin@lplatform.dev',
+    email: 'admin@platform.dev',
     jobTitle: 'Platform administrator',
   },
   sessionPreferences: { idleTimeoutMinutes: 60, requireReauthentication: false },

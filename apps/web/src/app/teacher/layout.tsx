@@ -4,8 +4,8 @@ import { TeacherShell } from "@/components/teacher/teacher-shell";
 
 export const metadata: Metadata = {
   title: {
-    default: "Teacher Portal · L_Platform",
-    template: "%s · Teacher Portal · L_Platform",
+    default: "Teacher Portal · PLATFORM",
+    template: "%s · Teacher Portal · PLATFORM",
   },
   description:
     "Educational programming platform teacher portal for assignments and question management.",

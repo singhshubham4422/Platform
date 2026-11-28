@@ -16,7 +16,7 @@ import {
   Sparkles,
   XCircle,
 } from 'lucide-react';
-import { LANGUAGES, getLanguage, type LanguageId } from '@lplatform/language-config';
+import { LANGUAGES, getLanguage, type LanguageId } from '@platform/language-config';
 import { monaco, registerCompletions } from './monaco-setup';
 import {
   fetchHistory,

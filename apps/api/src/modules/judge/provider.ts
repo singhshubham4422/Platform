@@ -1,4 +1,4 @@
-import type { LanguageId, Verdict } from '@lplatform/language-config';
+import type { LanguageId, Verdict } from '@platform/language-config';
 
 export interface JudgeTestInput {
   ordinal: number;

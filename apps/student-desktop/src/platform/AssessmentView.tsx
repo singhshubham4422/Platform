@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { LanguageId } from '@lplatform/language-config';
+import type { LanguageId } from '@platform/language-config';
 import {
   assessmentStatus,
   assessmentStoreKey,

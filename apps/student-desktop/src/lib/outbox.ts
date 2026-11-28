@@ -8,7 +8,7 @@
 // client-generated UUID so the server de-duplicates replays (activity events, code snapshots,
 // submissions via clientOperationId). Drafts carry a revision and timestamp; the server refuses
 // an older draft, so offline state never overwrites newer server data.
-import type { LanguageId } from '@lplatform/language-config';
+import type { LanguageId } from '@platform/language-config';
 import { ApiRequestError } from './api';
 import { postEvents, postSnapshots, pushDraft, submitCode } from './coding-api';
 import { OFFLINE_FIRST } from './offline-config';

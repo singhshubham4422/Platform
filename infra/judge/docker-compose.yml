@@ -1,9 +1,9 @@
 # Judge0 CE v1.13.1 upstream service topology (licensed GPL-3.0).
 # The API is published only on loopback for local development. Keep this host private in production.
-name: lplatform-judge
+name: platform-judge
 
 x-judge0: &judge0
-  image: lplatform/judge0-ce:1.13.1-redacted
+  image: platform/judge0-ce:1.13.1-redacted
   build:
     context: .
     dockerfile: Dockerfile

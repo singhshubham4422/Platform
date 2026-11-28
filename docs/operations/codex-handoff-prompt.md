@@ -1,4 +1,4 @@
-# STRICT TASK: TAKE L_PLATFORM FROM NO-GO TO VERIFIED RELEASE CANDIDATE
+# STRICT TASK: TAKE PLATFORM FROM NO-GO TO VERIFIED RELEASE CANDIDATE
 
 You are working in `C:\Users\sshub\Videos\Platform`, a pnpm monorepo with a local Git repository (baseline commit `32ca8ea`, no remote).
 Read these files first, in order. Do not start work until you have read them.
@@ -60,8 +60,8 @@ If no VM is available: mark **Blocked** and list exactly what is needed (VM spec
 3. With credentials: upload, download, confirm the object is private (unsigned GET returns 401/404), an expired download token is refused, and deletion and retention behave correctly. Without credentials: **Blocked**.
 
 ## Task 4 — Desktop release build
-1. Run `pnpm --filter @lplatform/student-desktop tauri build` on Windows x64. Fix build errors without changing behaviour.
-2. Install the MSI or NSIS build and test by hand: OTP sign-in → open assignment → write code offline → quit → reopen (draft present) → reconnect → queued submission shows "waiting to upload" then a server result. Confirm `%APPDATA%/com.lplatform.student/lplatform.db` exists and contains no tokens (`sqlite3 … ".dump" | findstr /i token` must be empty).
+1. Run `pnpm --filter @platform/student-desktop tauri build` on Windows x64. Fix build errors without changing behaviour.
+2. Install the MSI or NSIS build and test by hand: OTP sign-in → open assignment → write code offline → quit → reopen (draft present) → reconnect → queued submission shows "waiting to upload" then a server result. Confirm `%APPDATA%/com.platform.student/platform.db` exists and contains no tokens (`sqlite3 … ".dump" | findstr /i token` must be empty).
 3. Expose personal notes (already in `store.rs` as `store_save_note`/`store_list_notes`) in the course view. Add tests.
 4. Keep installers unsigned unless signing credentials are provided. Never describe them as signed.
 

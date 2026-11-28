@@ -9,10 +9,10 @@ use std::collections::HashMap;
 #[cfg(test)]
 use std::sync::Mutex;
 
-pub const DEVICE_KEY: &str = "lplatform/device-key";
+pub const DEVICE_KEY: &str = "platform/device-key";
 
 pub fn assessment_key_name(assessment_id: &str) -> String {
-    format!("lplatform/assessment/{assessment_id}")
+    format!("platform/assessment/{assessment_id}")
 }
 
 pub trait SecretStore: Send + Sync {
@@ -26,7 +26,7 @@ pub trait SecretStore: Send + Sync {
 pub struct Secrets(pub Box<dyn SecretStore>);
 
 #[cfg(target_os = "windows")]
-const SERVICE: &str = "com.lplatform.student";
+const SERVICE: &str = "com.platform.student";
 
 /// OS keychain store. Each secret is one credential entry under the app's service name.
 pub struct KeyringSecrets;

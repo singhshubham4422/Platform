@@ -8,10 +8,10 @@ import {
 describe('LMS helpers', () => {
   it('extracts join codes from raw codes and invite URLs', () => {
     expect(extractJoinCode('SEC-GRADE10A-001')).toBe('sec-grade10a-001');
-    expect(extractJoinCode('https://app.lplatform.edu/join?code=Sec-Grade10B-002')).toBe(
+    expect(extractJoinCode('https://app.platform.edu/join?code=Sec-Grade10B-002')).toBe(
       'sec-grade10b-002',
     );
-    expect(extractJoinCode('lplatform://class?join=sec-demo-1')).toBe('sec-demo-1');
+    expect(extractJoinCode('platform://class?join=sec-demo-1')).toBe('sec-demo-1');
     expect(extractJoinCode('   ')).toBe('');
   });
 

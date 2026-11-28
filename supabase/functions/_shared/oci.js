@@ -37,7 +37,7 @@ export function createOci({env,fetchImpl=fetch,now=()=>new Date(),cryptoImpl=glo
     async createPar({objectName,accessType,expiresAt}){
       const c=config(env);if(!['ObjectRead','ObjectWrite'].includes(accessType))throw new Error('OCI_PAR_ACCESS_TYPE_INVALID');
       const url=new URL(`/n/${pathSegment(c.OCI_NAMESPACE)}/b/${pathSegment(c.OCI_BUCKET)}/p/`,c.origin);
-      const body=enc.encode(JSON.stringify({name:`lplatform-${accessType.toLowerCase()}-${cryptoImpl.randomUUID()}`,accessType,timeExpires:expiresAt,objectName}));
+      const body=enc.encode(JSON.stringify({name:`platform-${accessType.toLowerCase()}-${cryptoImpl.randomUUID()}`,accessType,timeExpires:expiresAt,objectName}));
       const headers={'date':dateHeader(now),'host':url.host,'content-type':'application/json','content-length':String(body.length),'x-content-sha256':b64(new Uint8Array(await cryptoImpl.subtle.digest('SHA-256',body)))};
       const r=await signedFetch({method:'POST',url,headers,body,signingHeaders:BODY,keyId:c.keyId,privateKeyPem:c.privateKey,fetchImpl,cryptoImpl});
       if(!r.ok)throw new Error(`OCI_PAR_FAILED:${r.status}`);let result;try{result=await r.json()}catch{throw new Error('OCI_PAR_INVALID_RESPONSE')}

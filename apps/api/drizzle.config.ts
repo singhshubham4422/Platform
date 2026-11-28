@@ -6,6 +6,6 @@ export default defineConfig({
   out: './drizzle',
   dbCredentials: {
     url:
-      process.env.DATABASE_URL || 'postgresql://lplatform:lplatform_dev@localhost:5432/lplatform',
+      process.env.DATABASE_URL || 'postgresql://platform:platform_dev@localhost:5432/platform',
   },
 });

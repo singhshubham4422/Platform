@@ -101,7 +101,7 @@ export async function seedDatabase() {
       null,
       'Platform',
       'Owner',
-      'admin@lplatform.dev',
+      'admin@platform.dev',
       'PLATFORM_OWNER',
       ownerPassHash,
     );
@@ -112,7 +112,7 @@ export async function seedDatabase() {
       null,
       'Platform',
       'Developer',
-      'developer@lplatform.dev',
+      'developer@platform.dev',
       'PLATFORM_DEVELOPER',
       devPassHash,
     );
@@ -167,7 +167,7 @@ export async function seedDatabase() {
       null,
       'Asha',
       'Verma',
-      'learner@lplatform.dev',
+      'learner@platform.dev',
       'STUDENT',
       studentPassHash,
     );
@@ -565,7 +565,7 @@ export async function seedDatabase() {
     // 12. Platform Settings
     await client.query(
       `INSERT INTO platform_settings (id, platform_name, support_email, session_timeout_minutes, max_file_upload_mb, maintenance_mode)
-       VALUES ('default', 'L_Platform', 'support@lplatform.dev', 1440, 10, false)
+       VALUES ('default', 'PLATFORM', 'support@platform.dev', 1440, 10, false)
        ON CONFLICT (id) DO NOTHING`,
     );
 

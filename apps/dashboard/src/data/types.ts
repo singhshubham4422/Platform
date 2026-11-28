@@ -1,4 +1,4 @@
-import type { LanguageId, Verdict } from '@lplatform/language-config';
+import type { LanguageId, Verdict } from '@platform/language-config';
 
 export type Role = 'STUDENT' | 'TEACHER' | 'COLLEGE_ADMIN' | 'PLATFORM_OWNER';
 export type ProfileStatus = 'ACTIVE' | 'DISABLED';

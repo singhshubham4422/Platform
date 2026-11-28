@@ -24,7 +24,7 @@ export const DEMO_ACCOUNTS: DemoAccount[] =
   process.env.NODE_ENV !== "production" && process.env.NEXT_PUBLIC_ENABLE_DEMO_ACCOUNTS !== "false"
     ? [
         {
-          email: "admin@lplatform.dev",
+          email: "admin@platform.dev",
           password: "Admin@123",
           label: "Platform owner",
           description: "Local development platform owner.",
@@ -68,7 +68,7 @@ export const authService = {
       clearSessionCookie();
       throw new ApiError(
         ERROR_CODES.FORBIDDEN,
-        "Student accounts must sign in using the L_Platform Student Desktop application.",
+        "Student accounts must sign in using the PLATFORM Student Desktop application.",
         { status: 403 },
       );
     }

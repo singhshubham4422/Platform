@@ -26,8 +26,8 @@ export async function applyUnifiedPlatformMigration(pool: pg.Pool): Promise<void
     await client.query(FUNCTIONS_SQL);
     await client.query(RLS_SQL);
     await client.query(`
-      GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO lplatform_app;
-      GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO lplatform_app;
+      GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO platform_app;
+      GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO platform_app;
     `);
     await client.query(SEED_REFERENCE_SQL);
     await client.query('COMMIT');

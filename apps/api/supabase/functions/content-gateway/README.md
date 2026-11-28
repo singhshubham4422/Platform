@@ -1,10 +1,10 @@
-# L_Platform Hybrid Architecture — Supabase & OCI Integration
+# PLATFORM Hybrid Architecture — Supabase & OCI Integration
 
-This directory holds the deployment blueprints and Edge Function gateway for running L_Platform across the approved hybrid topology:
+This directory holds the deployment blueprints and Edge Function gateway for running PLATFORM across the approved hybrid topology:
 
 1. **Supabase Auth + Supabase PostgreSQL (`supabase/migrations/20261111000001_hybrid_architecture_and_rls.sql`)**
    - Authoritative identity across Web Portal and Tauri Windows Student Desktop App.
-   - Student data: `lplatform.profiles`, `lplatform.section_memberships`, `lplatform.lesson_progress`, `lplatform.assessment_attempts`, and `lplatform.submissions` protected with `ENABLE` + `FORCE ROW LEVEL SECURITY`.
+   - Student data: `platform.profiles`, `platform.section_memberships`, `platform.lesson_progress`, `platform.assessment_attempts`, and `platform.submissions` protected with `ENABLE` + `FORCE ROW LEVEL SECURITY`.
    - `PLATFORM_DEVELOPER` is explicitly prevented by RLS from reading student PII, organization rosters, attempts, or submissions.
 
 2. **Supabase Edge Functions (`supabase/functions/content-gateway/index.ts`)**

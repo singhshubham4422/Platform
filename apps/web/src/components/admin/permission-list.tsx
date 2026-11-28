@@ -18,7 +18,7 @@ export function PermissionList({ className }: { className?: string }) {
         </span>
         <CardTitle>Organization administrator access</CardTitle>
         <CardDescription>
-          These capabilities are granted by role and enforced by the L_Platform Backend API.
+          These capabilities are granted by role and enforced by the PLATFORM Backend API.
         </CardDescription>
       </CardHeader>
       <CardContent>

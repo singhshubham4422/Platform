@@ -1,3 +1,4 @@
+pub mod bundled;
 mod download;
 mod index;
 mod install;
@@ -37,6 +38,8 @@ pub struct RuntimeInstallProgress {
 
 pub struct RuntimeManager {
     pub root: PathBuf,
+    /// Read-only folder of runtimes shipped with the installer (see `bundled`).
+    pub bundled: Option<PathBuf>,
     installing: Mutex<HashSet<String>>,
 }
 
@@ -44,8 +47,17 @@ impl RuntimeManager {
     pub fn new(root: PathBuf) -> Self {
         Self {
             root,
+            bundled: None,
             installing: Mutex::new(HashSet::new()),
         }
+    }
+    pub fn with_bundled(mut self, bundled: Option<PathBuf>) -> Self {
+        self.bundled = bundled;
+        self
+    }
+    /// Writable cache folder for bundled toolchains.
+    pub fn cache_dir(&self) -> PathBuf {
+        self.root.join("cache")
     }
     fn acquire(&self, language: &str) -> Result<(), String> {
         let mut guard = self
@@ -64,23 +76,29 @@ impl RuntimeManager {
     }
 }
 
-pub fn runtimes_list(store: &Store) -> Result<Vec<RuntimeInfo>, String> {
+pub fn runtimes_list(store: &Store, manager: &RuntimeManager) -> Result<Vec<RuntimeInfo>, String> {
     let conn = store
         .0
         .lock()
         .map_err(|_| "IO: local database lock poisoned".to_string())?;
-    store::runtimes_list(&conn)
-        .map(|rows| {
-            rows.into_iter()
-                .map(|r| RuntimeInfo {
-                    language: r.language,
-                    version: r.version,
-                    path: r.path,
-                    installed_at: r.installed_at,
-                })
-                .collect()
+    let mut list: Vec<RuntimeInfo> = store::runtimes_list(&conn)
+        .map_err(|e| format!("IO: {e}"))?
+        .into_iter()
+        .map(|r| RuntimeInfo {
+            language: r.language,
+            version: r.version,
+            path: r.path,
+            installed_at: r.installed_at,
         })
-        .map_err(|e| format!("IO: {e}"))
+        .collect();
+    if let Some(root) = &manager.bundled {
+        for b in bundled::list(root) {
+            if !list.iter().any(|r| r.language == b.language) {
+                list.push(b);
+            }
+        }
+    }
+    Ok(list)
 }
 
 pub async fn runtimes_available(

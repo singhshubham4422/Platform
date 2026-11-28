@@ -1,8 +1,8 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "L_Platform Student",
+  "productName": "PLATFORM Student",
   "version": "0.4.0",
-  "identifier": "com.lplatform.student",
+  "identifier": "com.platform.student",
   "build": {
     "frontendDist": "../dist",
     "devUrl": "http://localhost:1420",
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "L_Platform Student",
+        "title": "PLATFORM Student",
         "width": 1440,
         "height": 920,
         "minWidth": 1100,
@@ -41,6 +41,9 @@
     "macOS": {
       "signingIdentity": "-",
       "minimumSystemVersion": "11.0"
+    },
+    "resources": {
+      "runtimes/": "runtimes/"
     }
   }
 }

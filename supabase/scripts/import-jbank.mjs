@@ -12,7 +12,7 @@ const db = value('--database-url');
 const execute = args.includes('--i-understand-this-writes');
 if (!value('--in')) { console.error('Usage: node supabase/scripts/import-jbank.mjs --in <bank.json> [--database-url <url> --i-understand-this-writes]'); process.exit(2); }
 if (!execute || !db) { console.log(JSON.stringify({ plan:'Import J-platform bank as DRAFT / IMPORTED_UNREVIEWED; stable question IDs; no solution code.', input:bank, writes:false, command:'add --database-url <url> --i-understand-this-writes to execute' },null,2)); process.exit(1); }
-const temp=await mkdtemp(path.join(os.tmpdir(),'lplatform-jbank-'));
+const temp=await mkdtemp(path.join(os.tmpdir(),'platform-jbank-'));
 try {
   const cli=path.join(root,'packages/pack-format/bin/pack-builder.mjs');
   const sourcePath=path.join(temp,'source.json');

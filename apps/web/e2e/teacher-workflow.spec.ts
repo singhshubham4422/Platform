@@ -21,7 +21,7 @@ test.describe("role boundaries & desktop gating", () => {
 
   test("restricts platform developers to platform curriculum routes", async ({ page }) => {
     await page.goto("/login");
-    await page.getByLabel("Email Address").fill("developer@lplatform.dev");
+    await page.getByLabel("Email Address").fill("developer@platform.dev");
     await page.getByLabel("Password", { exact: true }).fill("Dev@123");
     await page.getByRole("button", { name: "Sign In" }).click();
 

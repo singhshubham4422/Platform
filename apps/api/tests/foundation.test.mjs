@@ -42,8 +42,8 @@ test('product and migration jobs are separate from bootstrap smoke tests', () =>
   );
   assert.match(
     read('.github/workflows/docker-build.yml'),
-    /lplatform-backend:\$\{\{ github\.sha \}\}/,
+    /platform-backend:\$\{\{ github\.sha \}\}/,
   );
-  assert.doesNotMatch(read('.github/workflows/release.yml'), /lplatform-backend:release/);
+  assert.doesNotMatch(read('.github/workflows/release.yml'), /platform-backend:release/);
   assert.match(read('.github/workflows/release.yml'), /existing release/i);
 });

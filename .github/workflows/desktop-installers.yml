@@ -1,0 +1,109 @@
+name: Desktop installers
+
+# Builds the PLATFORM Student installers on each operating system with Python, C/C++ (Zig's
+# clang) and Java bundled inside, so students never install a compiler. Each job first proves
+# the bundled toolchains compile and run real programs on that OS.
+#
+# - Run it from the Actions tab (workflow_dispatch) to get installers as build artifacts.
+# - Push a tag `app-vX.Y.Z` to also publish a GitHub release with SHA256SUMS.txt.
+#
+# Repository variables used (Settings -> Secrets and variables -> Actions -> Variables), all public
+# values: VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY, VITE_FUNCTIONS_URL, and optionally
+# VITE_LANG_PACKS_BASE_URL, PLATFORM_RELEASE_PUBKEY, PLATFORM_PACK_PUBKEY (Ed25519 public keys).
+# The installers are not code-signed.
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "app-v*"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: desktop-installers-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: ${{ matrix.label }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            label: windows-x86_64
+          - os: macos-14
+            label: macos-aarch64
+          - os: macos-15-intel
+            label: macos-x86_64
+          - os: ubuntu-22.04
+            label: linux-x86_64
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 90
+    env:
+      CI: true
+      VITE_OFFLINE_FIRST: "1"
+      VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+      VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
+      VITE_FUNCTIONS_URL: ${{ vars.VITE_FUNCTIONS_URL }}
+      VITE_LANG_PACKS_BASE_URL: ${{ vars.VITE_LANG_PACKS_BASE_URL }}
+      PLATFORM_RELEASE_PUBKEY: ${{ vars.PLATFORM_RELEASE_PUBKEY }}
+      PLATFORM_PACK_PUBKEY: ${{ vars.PLATFORM_PACK_PUBKEY }}
+      # linuxdeploy (AppImage) cannot mount FUSE on hosted runners.
+      APPIMAGE_EXTRACT_AND_RUN: "1"
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+        with:
+          version: 12.18.0
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          node-version: 24
+          cache: pnpm
+      - name: Install Linux build dependencies
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y build-essential curl file libssl-dev libayatana-appindicator3-dev librsvg2-dev libwebkit2gtk-4.1-dev patchelf xdg-utils
+      - run: pnpm install --frozen-lockfile
+      - name: Fetch bundled compilers
+        run: pnpm --filter @platform/student-desktop runtimes:fetch
+      - name: Compile and run Python, C, C++ and Java with the bundled compilers
+        run: cargo test --manifest-path apps/student-desktop/Cargo.toml bundled_toolchains -- --ignored
+      - name: Build installers
+        working-directory: apps/student-desktop
+        run: pnpm tauri build
+      - name: Collect installers
+        shell: bash
+        run: |
+          mkdir -p dist-installers
+          find apps/student-desktop/target/release/bundle -maxdepth 2 -type f \
+            \( -name '*.exe' -o -name '*.msi' -o -name '*.dmg' -o -name '*.AppImage' -o -name '*.deb' -o -name '*.rpm' \) \
+            -exec cp {} dist-installers/ \;
+          ls -la dist-installers
+          test -n "$(ls dist-installers)"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: installers-${{ matrix.label }}
+          path: dist-installers/*
+          if-no-files-found: error
+          compression-level: 0
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/app-v')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          path: installers
+          merge-multiple: true
+      - name: Checksums
+        working-directory: installers
+        run: sha256sum * > SHA256SUMS.txt && cat SHA256SUMS.txt
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" installers/* --repo "$GITHUB_REPOSITORY" --title "PLATFORM Student ${GITHUB_REF_NAME#app-v}" --notes "Installers for Windows, macOS and Linux with Python, C, C++ and Java built in. Not code-signed. Verify downloads with SHA256SUMS.txt."

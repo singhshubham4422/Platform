@@ -2,7 +2,7 @@
 
 ## Source of truth
 
-L_Platform backend owns organizations, users, courses, classes/sections, allocations, questions, assignments, assessments, submissions, grades, progress and audit records. L web becomes the staff client after its mock adapter is replaced domain by domain. L Tauri remains the student desktop baseline.
+PLATFORM backend owns organizations, users, courses, classes/sections, allocations, questions, assignments, assessments, submissions, grades, progress and audit records. L web becomes the staff client after its mock adapter is replaced domain by domain. L Tauri remains the student desktop baseline.
 
 J_Platform assets are candidate imports, not an authoritative runtime in this checkout. Its question JSON/admin UI can be assessed as source material, but content import must preserve provenance, licensing, IDs and version history. No J account/session or local database can be migrated until those missing sources/data are supplied.
 

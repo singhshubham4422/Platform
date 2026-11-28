@@ -71,10 +71,10 @@ jobs:
     services:
       postgres:
         image: postgres:16.15-bookworm
-        env: { POSTGRES_USER: test, POSTGRES_PASSWORD: test, POSTGRES_DB: lplatform_e2e }
+        env: { POSTGRES_USER: test, POSTGRES_PASSWORD: test, POSTGRES_DB: platform_e2e }
         ports: ["5432:5432"]
         options: >-
-          --health-cmd "pg_isready -U test -d lplatform_e2e"
+          --health-cmd "pg_isready -U test -d platform_e2e"
           --health-interval 10s --health-timeout 5s --health-retries 5
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -96,7 +96,7 @@ jobs:
       - name: Start backend API (migrate, seed, run)
         working-directory: backend
         env:
-          DATABASE_URL: postgresql://test:test@127.0.0.1:5432/lplatform_e2e
+          DATABASE_URL: postgresql://test:test@127.0.0.1:5432/platform_e2e
           NODE_ENV: test
           ENABLE_DEMO_RESET: "true"
           JWT_SECRET: ci-e2e-only-jwt-secret-0123456789abcdef0123456789

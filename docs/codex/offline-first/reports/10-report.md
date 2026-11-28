@@ -11,10 +11,10 @@ The schema, broker and re-check worker for assessments are implemented: signed o
 | 0006 migration: policy, views, index, `claim_recheck` | Done | `pnpm test:supabase` | `pass 22 / fail 0` |
 | `publish-pack` assessment path | Done | `node --test supabase/functions/_shared/*.test.mjs` | `tests 14 / pass 14 / fail 0` |
 | `register-device`, `assessment-key`, `submit-assessment-attempts` | Done | `pnpm test:supabase`; `node --test …` | same as above |
-| Re-check worker + unit test | Done | `pnpm --filter @lplatform/api test` | `Tests 32 passed (32)` |
-| Dashboard schedule/results/override/release | Done | `pnpm --filter @lplatform/dashboard test` | `Tests 27 passed (27)` |
-| Dashboard e2e (results route in matrix) | Done | `pnpm --filter @lplatform/dashboard exec playwright test` | `85 passed (26.7s)` |
-| Desktop assessment slice | **Blocked** | `cargo test`; `pnpm --filter @lplatform/student-desktop test` | 26 and 32 pre-existing tests pass; no phase 10 Rust/TS added |
+| Re-check worker + unit test | Done | `pnpm --filter @platform/api test` | `Tests 32 passed (32)` |
+| Dashboard schedule/results/override/release | Done | `pnpm --filter @platform/dashboard test` | `Tests 27 passed (27)` |
+| Dashboard e2e (results route in matrix) | Done | `pnpm --filter @platform/dashboard exec playwright test` | `85 passed (26.7s)` |
+| Desktop assessment slice | **Blocked** | `cargo test`; `pnpm --filter @platform/student-desktop test` | 26 and 32 pre-existing tests pass; no phase 10 Rust/TS added |
 | Real Judge0 re-check | **Blocked** | requires `infra/judge/production/README.md` hardware | not run |
 | Repo lint / typecheck / build | Done | `pnpm lint`, `pnpm typecheck`, `pnpm build` | all projects Done |
 | Repo unit/integration tests | Done | `pnpm test`, `pnpm test:integration` | `58 passed (58)`, `24 passed (24)` |

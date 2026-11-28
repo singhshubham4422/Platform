@@ -10,7 +10,7 @@ import { spawn } from 'node:child_process';
 import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { getLanguage, javaMainClass, outputsMatch, type LanguageId } from '@lplatform/language-config';
+import { getLanguage, javaMainClass, outputsMatch, type LanguageId } from '@platform/language-config';
 import {
   aggregateVerdict,
   MAX_OUTPUT_BYTES,

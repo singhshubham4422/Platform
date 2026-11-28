@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { BookOpen, ClipboardCheck, LogOut } from 'lucide-react';
+import React, { lazy, Suspense, useEffect, useRef, useState } from 'react';
+import { BookOpen, ClipboardCheck, Code2, LogOut } from 'lucide-react';
 import { SupabaseLogin } from '../components/SupabaseLogin';
 import { SyncStatus } from '../components/SyncStatus';
 import { AssessmentView } from '../platform/AssessmentView';
@@ -12,7 +12,12 @@ import { getCursor, setCursor } from '../lib/offline-store';
 
 const PROFILE_CURSOR = 'profile:v1';
 
-type Section = 'platform' | 'assessments';
+type Section = 'platform' | 'assessments' | 'playground';
+
+// Monaco is large: load the playground only when it is opened.
+const Playground = lazy(() =>
+  import('../platform/Playground').then((m) => ({ default: m.Playground })),
+);
 
 const APP_VERSION = '0.5.0';
 
@@ -44,7 +49,9 @@ export const OfflineApp: React.FC = () => {
         } else if (!navigator.onLine) {
           const { data } = await getSupabase().auth.getSession();
           const u = data.session?.user;
-          const cached = JSON.parse((await getCursor(PROFILE_CURSOR).catch(() => null)) ?? 'null') as StudentProfile | null;
+          const cached = JSON.parse(
+            (await getCursor(PROFILE_CURSOR).catch(() => null)) ?? 'null',
+          ) as StudentProfile | null;
           if (u && cached?.id === u.id) setProfile(cached);
         }
       } catch {
@@ -89,7 +96,7 @@ export const OfflineApp: React.FC = () => {
   if (configError) {
     return (
       <div className="loading-screen">
-        <span className="brand-mark">LP</span>
+        <span className="brand-mark">P</span>
         <p role="alert">This build is not configured for online sync. {configError}</p>
       </div>
     );
@@ -97,7 +104,7 @@ export const OfflineApp: React.FC = () => {
   if (loading) {
     return (
       <div className="loading-screen">
-        <span className="brand-mark">LP</span>
+        <span className="brand-mark">P</span>
         <p>Opening Student Workspace…</p>
       </div>
     );
@@ -116,20 +123,39 @@ export const OfflineApp: React.FC = () => {
 
   return (
     <div className="hr-app hr-app-sidebar">
-      <aside className="hr-sidebar" aria-label="Main navigation" style={{ display: 'flex', flexDirection: 'column' }}>
+      <aside
+        className="hr-sidebar"
+        aria-label="Main navigation"
+        style={{ display: 'flex', flexDirection: 'column' }}
+      >
         <div style={{ padding: 16 }}>
-          <span className="brand-mark">LP</span>
+          <span className="brand-mark">P</span>
           <p style={{ margin: '8px 0 0', fontWeight: 600 }}>{profile.fullName}</p>
           <p className="muted-text" style={{ margin: 0, fontSize: 12 }}>
             {profile.email}
           </p>
         </div>
         <nav style={{ display: 'flex', flexDirection: 'column', gap: 4, padding: '0 8px' }}>
-          <button className={`btn ${section === 'platform' ? 'btn-primary' : ''}`} aria-current={section === 'platform' ? 'page' : undefined} onClick={() => setSection('platform')}>
+          <button
+            className={`btn ${section === 'platform' ? 'btn-primary' : ''}`}
+            aria-current={section === 'platform' ? 'page' : undefined}
+            onClick={() => setSection('platform')}
+          >
             <BookOpen size={15} /> Platform
           </button>
-          <button className={`btn ${section === 'assessments' ? 'btn-primary' : ''}`} aria-current={section === 'assessments' ? 'page' : undefined} onClick={() => setSection('assessments')}>
+          <button
+            className={`btn ${section === 'assessments' ? 'btn-primary' : ''}`}
+            aria-current={section === 'assessments' ? 'page' : undefined}
+            onClick={() => setSection('assessments')}
+          >
             <ClipboardCheck size={15} /> Assessments
+          </button>
+          <button
+            className={`btn ${section === 'playground' ? 'btn-primary' : ''}`}
+            aria-current={section === 'playground' ? 'page' : undefined}
+            onClick={() => setSection('playground')}
+          >
+            <Code2 size={15} /> Playground
           </button>
         </nav>
         <div style={{ marginTop: 'auto' }}>
@@ -142,6 +168,11 @@ export const OfflineApp: React.FC = () => {
       <main className="hr-main">
         {section === 'platform' && <PlatformHome />}
         {section === 'assessments' && <AssessmentView />}
+        {section === 'playground' && (
+          <Suspense fallback={<p style={{ padding: 20 }}>Opening the playground…</p>}>
+            <Playground />
+          </Suspense>
+        )}
       </main>
     </div>
   );

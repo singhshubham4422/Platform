@@ -65,7 +65,7 @@ export async function otpRoutes(app: FastifyInstance) {
         );
         await sendEmail(tx, {
           to: email,
-          subject: 'Your L_Platform sign-in code',
+          subject: 'Your PLATFORM sign-in code',
           template: 'otp-login',
           text: `Hello ${user.first_name},\n\nYour sign-in code is ${code}. It expires in ${OTP_TTL_MINUTES} minutes.\nIf you did not request it, ignore this e-mail.\n`,
         });

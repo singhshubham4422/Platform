@@ -1,5 +1,5 @@
 import { useEffect,useMemo,useState } from 'react';
-import type { LanguageId } from '@lplatform/language-config';
+import type { LanguageId } from '@platform/language-config';
 import { packsGetQuestion,packsListQuestions,type PackInfo,type QuestionSummary,type QuestionView } from '../lib/packs';
 import { runtimesList } from '../lib/runtimes';
 import { RuntimeManager } from '../components/RuntimeManager';

@@ -146,7 +146,7 @@ export default function DashboardPage() {
             {getGreeting()}, {session.name}
           </h1>
           <p className="text-muted-foreground mt-1 text-sm">
-            Here is your live operational overview across L_Platform.
+            Here is your live operational overview across PLATFORM.
           </p>
         </div>
 
@@ -297,7 +297,7 @@ export default function DashboardPage() {
               <CardHeader className="flex-row items-start justify-between gap-2">
                 <div className="space-y-1">
                   <CardTitle>Recent Organizations</CardTitle>
-                  <CardDescription>Institutions active on L_Platform.</CardDescription>
+                  <CardDescription>Institutions active on PLATFORM.</CardDescription>
                 </div>
                 <Button variant="ghost" size="sm" asChild>
                   <Link href="/admin/organizations">

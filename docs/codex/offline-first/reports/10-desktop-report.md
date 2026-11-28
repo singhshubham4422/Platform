@@ -8,8 +8,8 @@ Completed the Phase 10 desktop assessment slice and verified the Windows runner 
 | --- | --- | --- | --- |
 | Runner fixes & behavioral probes (ACCEPTED, WA, RE, TLE, MLE, OLE, fork bomb, env isolation, hidden isolation) | **Verified** | `cargo +stable test --manifest-path apps/student-desktop/Cargo.toml` | `test result: ok. 50 passed; 0 failed; 0 ignored` |
 | Rust formatting & lint | **Verified** | `cargo +stable fmt --manifest-path apps/student-desktop/Cargo.toml --all -- --check` & `cargo +stable clippy --manifest-path apps/student-desktop/Cargo.toml --all-targets -- -D warnings` | Exit 0, 0 warnings |
-| Desktop `AssessmentView.tsx` & `OfflineApp.tsx` integration | **Verified** | `pnpm --filter @lplatform/student-desktop test` | `Test Files 15 passed (15)`, `Tests 57 passed (57)` |
-| Desktop TypeScript & ESLint | **Verified** | `pnpm --filter @lplatform/student-desktop typecheck` & `pnpm --filter @lplatform/student-desktop lint` | Exit 0 |
+| Desktop `AssessmentView.tsx` & `OfflineApp.tsx` integration | **Verified** | `pnpm --filter @platform/student-desktop test` | `Test Files 15 passed (15)`, `Tests 57 passed (57)` |
+| Desktop TypeScript & ESLint | **Verified** | `pnpm --filter @platform/student-desktop typecheck` & `pnpm --filter @platform/student-desktop lint` | Exit 0 |
 | End-to-end live assessment run (real Supabase/OCI/Judge0) | **Blocked** | – | Needs owner Supabase project, OCI bucket, release/pack keys, and x86 Linux Judge0 host |
 
 ## 3. Files changed

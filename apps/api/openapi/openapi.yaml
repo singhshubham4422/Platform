@@ -1,6 +1,6 @@
 openapi: 3.1.0
 info:
-  title: L_Platform Backend API
+  title: PLATFORM Backend API
   description: Multi-tenant educational programming and AI learning platform REST API
   version: 1.1.0
 servers:

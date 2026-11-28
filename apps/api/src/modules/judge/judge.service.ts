@@ -1,6 +1,6 @@
 // Judge gateway: provider selection, queue claiming and result persistence.
 // Runs inside the separate judge worker process (src/modules/judge/worker.ts), never inside the API.
-import type { LanguageId, Verdict } from '@lplatform/language-config';
+import type { LanguageId, Verdict } from '@platform/language-config';
 import { Judge0Provider } from './judge0.provider.js';
 import { LocalDevProvider } from './local-dev.provider.js';
 import { JudgeUnavailableError, type JudgeProvider, type JudgeTestInput } from './provider.js';

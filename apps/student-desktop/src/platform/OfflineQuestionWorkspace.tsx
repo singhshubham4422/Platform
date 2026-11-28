@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import Editor from '@monaco-editor/react';
-import { getLanguage, type LanguageId } from '@lplatform/language-config';
+import { getLanguage, type LanguageId } from '@platform/language-config';
 import { recordEvent, getLocalDraft, saveLocalDraft } from '../lib/outbox';
 import { runCustom } from '../lib/runner';
 import { runQuestion, type QuestionView } from '../lib/packs';

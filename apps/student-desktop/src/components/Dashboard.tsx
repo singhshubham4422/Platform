@@ -550,7 +550,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     <span>Explore Platform Courses</span>
                   </h3>
                   <p className="muted-text" style={{ fontSize: 12.5, marginTop: 2 }}>
-                    Free platform-wide courses available across L_Platform alongside your school
+                    Free platform-wide courses available across PLATFORM alongside your school
                     curriculum.
                   </p>
                 </div>

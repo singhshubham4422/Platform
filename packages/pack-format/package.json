@@ -1,5 +1,5 @@
 {
-  "name": "@lplatform/pack-format",
+  "name": "@platform/pack-format",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -11,7 +11,7 @@
     }
   },
   "bin": {
-    "lplatform-pack": "bin/pack-builder.mjs"
+    "platform-pack": "bin/pack-builder.mjs"
   },
   "scripts": {
     "test": "node --test test/*.test.mjs",

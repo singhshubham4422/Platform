@@ -1,9 +1,9 @@
 // Central re-check process for high-stakes assessment attempts.
-// Run with: pnpm --filter @lplatform/api recheck:worker
+// Run with: pnpm --filter @platform/api recheck:worker
 // It deliberately refuses to start without the sandboxed Judge0 provider.
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
-import type { LanguageId, Verdict } from '@lplatform/language-config';
+import type { LanguageId, Verdict } from '@platform/language-config';
 import { Judge0Provider } from './judge0.provider.js';
 import type { JudgeProvider, JudgeTestOutcome } from './provider.js';
 

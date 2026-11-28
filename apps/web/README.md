@@ -1,4 +1,4 @@
-# L Platform — Web Portal
+# PLATFORM — Web Portal
 
 One Next.js portal for **platform admins, organization admins and teachers** (students use the desktop app). Each role sees only its own area; every permission is enforced by the backend API and PostgreSQL row-level security — the web route guard is only for navigation.
 
@@ -34,7 +34,7 @@ pnpm e2e   # Playwright; needs the backend running with seeded data
 
 1. Import this repo in Vercel (framework: Next.js, defaults are fine).
 2. Environment variables:
-   - `BACKEND_URL` = your API URL (e.g. `https://lplatform-api.vercel.app`)
+   - `BACKEND_URL` = your API URL (e.g. `https://platform-api.vercel.app`)
    - `NEXT_PUBLIC_API_URL` = _(empty)_ — the browser calls `/api/*` on this domain and Next.js proxies to `BACKEND_URL`, so login cookies are first-party.
    - `NEXT_PUBLIC_ENABLE_DEMO_ACCOUNTS=false`
 3. Add this web domain to the backend's `CORS_ORIGIN`.

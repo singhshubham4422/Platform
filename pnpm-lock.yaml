@@ -191,7 +191,7 @@ importers:
       '@fastify/swagger-ui':
         specifier: ^6.1.3
         version: 6.1.4
-      '@lplatform/language-config':
+      '@platform/language-config':
         specifier: workspace:*
         version: link:../../packages/language-config
       argon2:
@@ -261,7 +261,7 @@ importers:
 
   apps/dashboard:
     dependencies:
-      '@lplatform/language-config':
+      '@platform/language-config':
         specifier: workspace:*
         version: link:../../packages/language-config
       '@supabase/supabase-js':
@@ -316,12 +316,12 @@ importers:
 
   apps/student-desktop:
     dependencies:
-      '@lplatform/language-config':
-        specifier: workspace:*
-        version: link:../../packages/language-config
       '@monaco-editor/react':
         specifier: 4.7.0
         version: 4.7.0(monaco-editor@0.52.2)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+      '@platform/language-config':
+        specifier: workspace:*
+        version: link:../../packages/language-config
       '@supabase/supabase-js':
         specifier: 2.119.2
         version: 2.119.2
@@ -395,12 +395,12 @@ importers:
       '@hookform/resolvers':
         specifier: ^5.9.2
         version: 5.9.2(@standard-schema/spec@1.1.0)(ajv@8.20.0)(react-hook-form@7.92.0(@types/react@19.3.0)(react@19.1.10))(zod@4.6.7)
-      '@lplatform/language-config':
-        specifier: workspace:*
-        version: link:../../packages/language-config
       '@next/env':
         specifier: 15.5.29
         version: 15.5.29
+      '@platform/language-config':
+        specifier: workspace:*
+        version: link:../../packages/language-config
       '@radix-ui/react-avatar':
         specifier: ^1.3.1
         version: 1.3.1(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.1.10(react@19.1.10))(react@19.1.10)

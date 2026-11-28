@@ -23,10 +23,10 @@ Nothing else.
 
 ## Tasks
 1. **Package skeleton:** `packages/pack-format/package.json`.
-   - Name `@lplatform/pack-format`, `"type": "module"`, `exports` with `types` and `default`.
+   - Name `@platform/pack-format`, `"type": "module"`, `exports` with `types` and `default`.
    - Scripts: `test` (`node --test`), `lint` (`node --check` on every `.js`/`.mjs` file, matching the repo's lint style; see how other packages lint and keep it equivalent), `typecheck` (`tsc --noEmit -p tsconfig.json` with `allowJs`/`checkJs` over `index.d.ts` only, or omit if language-config has none and say so).
    - Dependency: `fflate` 0.8.x.
-   - The `bin` field maps `lplatform-pack` to `bin/pack-builder.mjs`.
+   - The `bin` field maps `platform-pack` to `bin/pack-builder.mjs`.
 2. **Crypto, using only Web Crypto (`globalThis.crypto.subtle`) so it runs unchanged in Deno:**
    - `sha256Hex(bytes) → Promise<string>`: lowercase hex.
    - `generateKeyPair() → { seedB64, publicKeyB64 }`: Ed25519, raw 32-byte seed and public key. Import or export the seed through PKCS#8 with a fixed 16-byte prefix (`302e020100300506032b657004220420`). Document this in a code comment.
@@ -93,7 +93,7 @@ Nothing else.
 
 ## Verification (add to the report)
 ```
-pnpm --filter @lplatform/pack-format test
+pnpm --filter @platform/pack-format test
 node packages/pack-format/bin/pack-builder.mjs keygen --role pack --out .local/keys
 node packages/pack-format/bin/pack-builder.mjs import-jplatform --in content/j-platform-question-bank/questions.json --out .local/packs/jbank-source.json --course-id 7b0f5d7e-2b8c-4e47-9d0a-6a2c4f1d9e01 --version 1 --title "Java Practice (imported, unreviewed)"
 node packages/pack-format/bin/pack-builder.mjs course-pack --source .local/packs/jbank-source.json --out .local/packs --seed .local/keys/pack.seed

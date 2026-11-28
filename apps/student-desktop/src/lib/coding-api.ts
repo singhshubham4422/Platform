@@ -1,4 +1,4 @@
-import type { LanguageId } from '@lplatform/language-config';
+import type { LanguageId } from '@platform/language-config';
 import { getApiBaseUrl, request } from './api';
 
 export interface WorkspaceQuestion {

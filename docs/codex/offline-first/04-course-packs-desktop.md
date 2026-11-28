@@ -23,7 +23,7 @@ The student opens **Platform**, sees their installed course packs (and can impor
 - Create `docs/codex/offline-first/reports/04-report.md`.
 
 ## Tasks
-1. **Pack key:** reuse phase 02 `keys.rs` with role `pack`: env `LPLATFORM_PACK_PUBKEY`, dev file `.local/keys/pack.pub`.
+1. **Pack key:** reuse phase 02 `keys.rs` with role `pack`: env `PLATFORM_PACK_PUBKEY`, dev file `.local/keys/pack.pub`.
 2. **Install (`install.rs`):**
    - `packs_install_from_url(url, sigUrl, expectedSha256)`:
      - Download both into `{app_data}/packs/.partial/` (same rules as phase 02: https only except localhost in debug, size cap 200 MB, retries).
@@ -92,12 +92,12 @@ The student opens **Platform**, sees their installed course packs (and can impor
 ## Verification
 ```
 cargo +stable test --manifest-path apps/student-desktop/Cargo.toml packs
-pnpm --filter @lplatform/student-desktop test
-pnpm --filter @lplatform/student-desktop build
+pnpm --filter @platform/student-desktop test
+pnpm --filter @platform/student-desktop build
 ```
 **Manual, if a real runtime pack is available:**
 1. Build the J bank pack (phase 01 commands).
-2. Run `$env:VITE_OFFLINE_FIRST='1'; pnpm --filter @lplatform/student-desktop tauri dev`.
+2. Run `$env:VITE_OFFLINE_FIRST='1'; pnpm --filter @platform/student-desktop tauri dev`.
 3. Import the pack, pick Java, install Java, solve "Hello World Program", Submit, and get `ACCEPTED`.
 4. Disconnect the network and repeat with another question.
 

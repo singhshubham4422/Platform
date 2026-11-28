@@ -121,13 +121,13 @@ describe('Security, 5-Role RBAC, PostgreSQL RLS, Tenant Isolation & Workflows E2
       client.release();
     }
 
-    owner = await loginAs('admin@lplatform.dev', 'Admin@123');
-    developer = await loginAs('developer@lplatform.dev', 'Dev@123');
+    owner = await loginAs('admin@platform.dev', 'Admin@123');
+    developer = await loginAs('developer@platform.dev', 'Dev@123');
     orgAdminA = await loginAs('priya.sharma@riverside.edu', 'OrgAdmin@123');
     teacherA = await loginAs('teacher@riverside.edu', 'Teacher@123');
     student1A = await loginAs('student1@riverside.edu', 'Student@123');
     student2A = await loginAs('student2@riverside.edu', 'Student@123');
-    independentLearner = await loginAs('learner@lplatform.dev', 'Student@123');
+    independentLearner = await loginAs('learner@platform.dev', 'Student@123');
     orgBAdmin = await loginAs(`beta.admin.${runTag}@orgb.test`, 'TenantTest@123');
     orgBStudent = await loginAs(`beta.student.${runTag}@orgb.test`, 'TenantTest@123');
   });
@@ -315,9 +315,9 @@ describe('Security, 5-Role RBAC, PostgreSQL RLS, Tenant Isolation & Workflows E2
     }
   });
 
-  it('enforces PostgreSQL lplatform_app FORCE ROW LEVEL SECURITY across tenants and PLATFORM_DEVELOPER', async () => {
+  it('enforces PostgreSQL platform_app FORCE ROW LEVEL SECURITY across tenants and PLATFORM_DEVELOPER', async () => {
     const roleCheck = await pool.query(
-      `SELECT rolname, rolbypassrls FROM pg_roles WHERE rolname = 'lplatform_app'`,
+      `SELECT rolname, rolbypassrls FROM pg_roles WHERE rolname = 'platform_app'`,
     );
     expect(roleCheck.rowCount).toBe(1);
     expect(roleCheck.rows[0].rolbypassrls).toBe(false);

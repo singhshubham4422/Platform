@@ -1,14 +1,14 @@
-# L_Platform — Judge0 CE 1.13.1 production deployment (dedicated Ubuntu 22.04 LTS VM).
+# PLATFORM — Judge0 CE 1.13.1 production deployment (dedicated Ubuntu 22.04 LTS VM).
 #
 # Topology: platform API host ──(private network, TLS proxy, X-Auth-Token)──► judge VM.
 # Nothing here is reachable from the public internet: the API port binds only to the VM's
 # private address (JUDGE0_BIND_ADDR) and the host firewall allows it only from the API host(s).
 # Run scripts/preflight.sh first; Judge0 CE 1.13.1's Isolate needs cgroup v1 (see README).
-name: lplatform-judge-prod
+name: platform-judge-prod
 
 x-judge0: &judge0
   # Official image pinned by digest, with secrets removed from the startup environment dump.
-  image: lplatform/judge0-ce:1.13.1-redacted
+  image: platform/judge0-ce:1.13.1-redacted
   build:
     context: ..
     dockerfile: Dockerfile
@@ -89,6 +89,6 @@ networks:
 
 volumes:
   judge-data:
-    name: lplatform_judge_prod_data
+    name: platform_judge_prod_data
   judge-redis:
-    name: lplatform_judge_prod_redis
+    name: platform_judge_prod_redis

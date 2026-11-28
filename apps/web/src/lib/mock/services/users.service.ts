@@ -475,7 +475,7 @@ export const userService: UserService = {
 function readActorId(): string | null {
   if (typeof window === "undefined") return null;
   try {
-    const raw = window.localStorage.getItem("lplatform.mock.session");
+    const raw = window.localStorage.getItem("platform.mock.session");
     if (!raw) return null;
     return (JSON.parse(raw) as { userId?: string }).userId ?? null;
   } catch {

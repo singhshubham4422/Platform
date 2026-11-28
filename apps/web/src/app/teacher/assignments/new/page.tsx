@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { NativeSelect } from "@/components/ui/native-select";
 import { backendRequest } from "@/lib/api/client";
-import { LANGUAGES } from "@lplatform/language-config";
+import { LANGUAGES } from "@platform/language-config";
 import { useApiQuery } from "@/lib/hooks/use-api";
 import { cn } from "@/lib/utils";
 

@@ -89,7 +89,7 @@ Two independent agents can run **Track A** (01 → 02 → 03 → 04) and **Track
 - Two key roles:
   - `release` signs language packs and `packs/lang/index.json`. Held offline by the owner.
   - `pack` signs course and assessment packs. Held as the secret `PACK_SIGNING_KEY` (base64 of the 32-byte seed) in the edge functions.
-- The desktop app gets the public keys at **compile time** from env vars `LPLATFORM_RELEASE_PUBKEY` and `LPLATFORM_PACK_PUBKEY` (`option_env!`).
+- The desktop app gets the public keys at **compile time** from env vars `PLATFORM_RELEASE_PUBKEY` and `PLATFORM_PACK_PUBKEY` (`option_env!`).
   - In debug builds and tests, if unset, it uses keys from `.local/keys/release.pub` and `.local/keys/pack.pub` when present.
   - In release builds, if unset, every install fails with the error `PACK_KEY_NOT_CONFIGURED`. There is no silent fallback.
 

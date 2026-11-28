@@ -101,7 +101,7 @@ A JavaScript reference calculator defines the exact numbers and is the test orac
    - The `pg_cron` fallback: it is the same formulas as `kpi-calc`, written in Supabase SQL. Spec only; do not implement it in this phase.
 
 ## Tests
-- `pnpm --filter @lplatform/kpi-calc test`:
+- `pnpm --filter @platform/kpi-calc test`:
   - Every fixture equals its expected file.
   - Property tests:
     - Shuffling the event order gives identical output (because of the sort).
@@ -119,7 +119,7 @@ A JavaScript reference calculator defines the exact numbers and is the test orac
 
 ## Verification
 ```
-pnpm --filter @lplatform/kpi-calc test
+pnpm --filter @platform/kpi-calc test
 node oracle/atp/verify.mjs        # prints SKIPPED without ATP_* env
 ```
 Plus master §7.

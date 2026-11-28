@@ -20,11 +20,11 @@ const dataDir = join(dataRoot, 'cluster');
 const logFile = join(dataRoot, 'server.log');
 export const PORT = Number(process.env.LOCAL_PG_PORT || 54330);
 const SUPERUSER = 'postgres';
-const APP_USER = 'lplatform';
-const APP_PASSWORD = 'lplatform_dev';
-export const DEV_DB = 'lplatform_dev';
-export const TEST_DB = 'lplatform_test';
-const SUPABASE_TEST_DB = 'lplatform_supabase_test';
+const APP_USER = 'platform';
+const APP_PASSWORD = 'platform_dev';
+export const DEV_DB = 'platform_dev';
+export const TEST_DB = 'platform_test';
+const SUPABASE_TEST_DB = 'platform_supabase_test';
 export const devUrl = `postgresql://${APP_USER}:${APP_PASSWORD}@127.0.0.1:${PORT}/${DEV_DB}`;
 export const testUrl = `postgresql://${APP_USER}:${APP_PASSWORD}@127.0.0.1:${PORT}/${TEST_DB}`;
 
@@ -91,14 +91,14 @@ function ensureRoleAndDb(db) {
   if (!hasRole) {
     psql(`CREATE ROLE ${APP_USER} LOGIN PASSWORD '${APP_PASSWORD}' NOSUPERUSER CREATEDB CREATEROLE BYPASSRLS`);
   }
-  // Owner/migrator mirrors Supabase's postgres role (BYPASSRLS); API requests run as lplatform_app.
+  // Owner/migrator mirrors Supabase's postgres role (BYPASSRLS); API requests run as platform_app.
   psql(`ALTER ROLE ${APP_USER} BYPASSRLS`);
   const hasDb = psql(`SELECT 1 FROM pg_database WHERE datname='${db}'`);
   if (!hasDb) psql(`CREATE DATABASE ${db} OWNER ${APP_USER}`);
 }
 
 function apiScript(script, url) {
-  run(isWin ? 'pnpm.cmd' : 'pnpm', ['--filter', '@lplatform/api', script], {
+  run(isWin ? 'pnpm.cmd' : 'pnpm', ['--filter', '@platform/api', script], {
     cwd: root,
     shell: isWin,
     env: { ...process.env, DATABASE_URL: url, DATABASE_SSL: 'false', NODE_ENV: 'test', ALLOW_DEV_SEED: 'true' },
@@ -146,7 +146,7 @@ switch (cmd) {
       const applySql = (file) => run('psql', ['-h','127.0.0.1','-p',String(PORT),'-U','postgres','-d',SUPABASE_TEST_DB,'-v','ON_ERROR_STOP=1','-f',file], { stdio:'inherit' });
       applySql(join(root,'supabase','tests-support','auth-stub.sql'));
       for (const file of readdirSync(join(root,'supabase','migrations')).filter((n)=>n.endsWith('.sql')).sort()) applySql(join(root,'supabase','migrations',file));
-      run(isWin?'pnpm.cmd':'pnpm',['--filter','@lplatform/supabase-tests','test'],{cwd:root,shell:isWin,env:{...process.env,SUPABASE_TEST_DATABASE_URL:url}});
+      run(isWin?'pnpm.cmd':'pnpm',['--filter','@platform/supabase-tests','test'],{cwd:root,shell:isWin,env:{...process.env,SUPABASE_TEST_DATABASE_URL:url}});
     } finally {
       if (created) psql(`DROP DATABASE ${SUPABASE_TEST_DB} WITH (FORCE)`);
     }

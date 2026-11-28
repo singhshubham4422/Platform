@@ -1,6 +1,6 @@
 // Judge0 CE adapter. Talks only to the private Judge0 endpoint (never exposed to clients).
 // Docs: https://ce.judge0.com — submissions are created in a batch with base64 encoding and polled.
-import { getLanguage, javaMainClass, outputsMatch, type Verdict } from '@lplatform/language-config';
+import { getLanguage, javaMainClass, outputsMatch, type Verdict } from '@platform/language-config';
 import {
   aggregateVerdict,
   JudgeUnavailableError,

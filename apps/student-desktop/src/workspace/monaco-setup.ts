@@ -7,8 +7,8 @@ import 'monaco-editor/esm/vs/basic-languages/cpp/cpp.contribution.js';
 import 'monaco-editor/esm/vs/basic-languages/java/java.contribution.js';
 import EditorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker';
 import { loader } from '@monaco-editor/react';
-import type { LanguageId } from '@lplatform/language-config';
-import { getLanguage } from '@lplatform/language-config';
+import type { LanguageId } from '@platform/language-config';
+import { getLanguage } from '@platform/language-config';
 import { completionsFor, type CompletionKind } from '../lib/language-completions';
 
 (self as unknown as { MonacoEnvironment: monaco.Environment }).MonacoEnvironment = {

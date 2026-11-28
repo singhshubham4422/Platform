@@ -14,7 +14,7 @@ async function sendInvitationEmail(tx: Tx, to: string, orgName: string, role: st
   const base = (process.env.WEB_APP_URL || 'http://localhost:3000').replace(/\/$/, '');
   return sendEmail(tx, {
     to,
-    subject: `You are invited to ${orgName} on L_Platform`,
+    subject: `You are invited to ${orgName} on PLATFORM`,
     template: 'invitation',
     text: `You have been invited to join ${orgName} as ${role.replace('_', ' ').toLowerCase()}.
 
