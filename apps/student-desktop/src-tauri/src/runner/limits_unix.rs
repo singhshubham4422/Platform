@@ -31,17 +31,31 @@ pub fn set_limits(
                 (libc::RLIMIT_CPU, secs, secs.saturating_add(1)),
                 (libc::RLIMIT_CORE, 0, 0),
                 (libc::RLIMIT_AS, mem, mem),
-                (libc::RLIMIT_NPROC, 64, 64),
                 (libc::RLIMIT_FSIZE, 16 * 1024 * 1024, 16 * 1024 * 1024),
+                (libc::RLIMIT_NPROC, 64, 64),
             ];
-            let limits = if compile { &all[..2] } else { &all[..] };
+            // RLIMIT_NPROC counts every thread of the user, so the JVM (many threads) cannot
+            // live under it on a desktop; Java keeps the address-space and CPU limits instead.
+            let limits = if compile {
+                &all[..2]
+            } else if java {
+                &all[..4]
+            } else {
+                &all[..]
+            };
             for &(resource, soft, hard) in limits {
                 let lim = libc::rlimit {
                     rlim_cur: soft,
                     rlim_max: hard,
                 };
                 if libc::setrlimit(resource, &lim) != 0 {
-                    return Err(std::io::Error::last_os_error());
+                    // macOS rejects address-space and per-user process limits with EINVAL;
+                    // there they are best effort (CPU, file size and core stay enforced).
+                    let optional = cfg!(target_os = "macos")
+                        && (resource == libc::RLIMIT_AS || resource == libc::RLIMIT_NPROC);
+                    if !optional {
+                        return Err(std::io::Error::last_os_error());
+                    }
                 }
             }
             Ok(())

@@ -231,6 +231,7 @@ fn execute(
     let err_thread =
         thread::spawn(move || read_capped(err, 16 * 1024, Arc::new(AtomicBool::new(false))));
     let mut timed = false;
+    #[cfg_attr(not(windows), allow(unused_mut))]
     let mut cpu_polled_hit = false;
     let cpu_limit_ms = cpu_time.as_millis() as u64;
     let status = loop {
